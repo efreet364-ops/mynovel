@@ -1,4 +1,4 @@
-package io.github.novel.mynovel.core.common.constant;
+package io.github.novel.mynovel.core.constant;
 
 /**
  * 缓存相关常量
@@ -33,6 +33,12 @@ public class CacheConsts {
      * 首页友情链接缓存
      * */
     public static final String HOME_FRIEND_LINK_CACHE_NAME = "homeFriendLinkCache";
+
+    /**
+     * 图片验证码缓存 KEY
+     */
+    public static final String IMG_VERIFY_CODE_CACHE_KEY =
+            REDIS_CACHE_PREFIX + "imgVerifyCodeCache::";
 
     /**
      * 缓存配置常量

@@ -2,7 +2,7 @@ package io.github.novel.mynovel.manager;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import io.github.novel.mynovel.core.common.constant.CacheConsts;
+import io.github.novel.mynovel.core.constant.CacheConsts;
 import io.github.novel.mynovel.dao.entity.BookInfo;
 import io.github.novel.mynovel.dao.entity.HomeBook;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
