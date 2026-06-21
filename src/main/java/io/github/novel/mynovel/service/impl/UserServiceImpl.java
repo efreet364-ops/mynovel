@@ -12,7 +12,9 @@ import io.github.novel.mynovel.dao.entity.UserInfo;
 import io.github.novel.mynovel.dao.mapper.SysUserMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.novel.mynovel.dao.mapper.UserInfoMapper;
+import io.github.novel.mynovel.dto.req.UserLoginReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
+import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 import io.github.novel.mynovel.manager.VerifyCodeManager;
 import io.github.novel.mynovel.service.UserService;
@@ -23,6 +25,7 @@ import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * <p>
@@ -80,5 +83,35 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                         .build()
         );
 
+    }
+
+    @Override
+    public RestResp<UserLoginRespDto> login(UserLoginReqDto dto) {
+        // 查询用户信息
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.UserInfoTable.COLUMN_USERNAME, dto.getUsername())
+                .last(DatabaseConsts.SqlEnum.LIMIT_1.getSql());
+        UserInfo userInfo = userInfoMapper.selectOne(queryWrapper);
+
+        if (Objects.isNull(userInfo)) {
+            // 用户不存在
+            throw new BusinessException(ErrorCodeEnum.USER_ACCOUNT_NOT_EXIST);
+        }
+
+        // 校验密码
+        if (!Objects.equals(userInfo.getPassword()
+                , DigestUtils.md5DigestAsHex(dto.getPassword().getBytes(StandardCharsets.UTF_8)))) {
+            // 密码错误
+            throw new BusinessException(ErrorCodeEnum.USER_PASSWORD_ERROR);
+        }
+
+        // 登录成功，生成并返回JWT
+        return RestResp.ok(
+                UserLoginRespDto.builder()
+                        .uid(userInfo.getId())
+                        .nickName(userInfo.getNickName())
+                        .token(jwtUtils.generateToken(userInfo.getId(),SystemConfigConsts.NOVEL_FRONT_KEY))
+                        .build()
+        );
     }
 }

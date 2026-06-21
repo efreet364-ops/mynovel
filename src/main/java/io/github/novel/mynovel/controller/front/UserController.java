@@ -3,7 +3,9 @@ package io.github.novel.mynovel.controller.front;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.core.constant.SystemConfigConsts;
+import io.github.novel.mynovel.dto.req.UserLoginReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
+import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 import io.github.novel.mynovel.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -39,5 +41,13 @@ public class UserController {
     @PostMapping("register")
     public RestResp<UserRegisterRespDto> register(@Valid @RequestBody UserRegisterReqDto dto) {
         return userService.register(dto);
+    }
+
+    /**
+     * 用户登录接口
+     */
+    @PostMapping("login")
+    public RestResp<UserLoginRespDto> login(@Valid @RequestBody UserLoginReqDto dto) {
+        return userService.login(dto);
     }
 }
