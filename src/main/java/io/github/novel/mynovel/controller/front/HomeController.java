@@ -3,7 +3,9 @@ package io.github.novel.mynovel.controller.front;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.dto.resp.HomeBookRespDto;
+import io.github.novel.mynovel.dto.resp.HomeFriendLinkRespDto;
 import io.github.novel.mynovel.service.HomeService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +17,6 @@ import java.util.List;
 /**
  * 首页模块 API 接口
  *
- * @author xiongxiaoyang
- * @date 2022/5/12
  */
 @Tag(name = "HomeController", description = "前台门户-首页模块")
 @RestController
@@ -29,8 +29,18 @@ public class HomeController {
     /**
      * 首页小说推荐查询接口
      * */
+    @Operation(summary = "首页小说推荐查询接口")
     @GetMapping("books")
     public RestResp<List<HomeBookRespDto>> listHomeBooks(){
         return homeService.listHomeBooks();
+    }
+
+    /**
+     * 首页友情链接列表查询接口
+     */
+    @Operation(summary = "首页友情链接列表查询接口")
+    @GetMapping("friend_Link/list")
+    public RestResp<List<HomeFriendLinkRespDto>> listHomeFriendLinks() {
+        return homeService.listHomeFriendLinks();
     }
 }

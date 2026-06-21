@@ -1,4 +1,4 @@
-package io.github.novel.mynovel.manager;
+package io.github.novel.mynovel.manager.cache;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;

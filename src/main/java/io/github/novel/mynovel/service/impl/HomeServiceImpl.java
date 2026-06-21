@@ -2,7 +2,9 @@ package io.github.novel.mynovel.service.impl;
 
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.dto.resp.HomeBookRespDto;
-import io.github.novel.mynovel.manager.HomeBookCacheManager;
+import io.github.novel.mynovel.dto.resp.HomeFriendLinkRespDto;
+import io.github.novel.mynovel.manager.cache.FriendLinkCacheManager;
+import io.github.novel.mynovel.manager.cache.HomeBookCacheManager;
 import io.github.novel.mynovel.service.HomeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,16 @@ public class HomeServiceImpl implements HomeService {
 
     private final HomeBookCacheManager homeBookCacheManager;
 
+    private final FriendLinkCacheManager friendLinkCacheManager;
+
     @Override
     public RestResp<List<HomeBookRespDto>> listHomeBooks() {
         return RestResp.ok(homeBookCacheManager.listHomeBooks());
+    }
+
+    @Override
+    public RestResp<List<HomeFriendLinkRespDto>> listHomeFriendLinks() {
+        return RestResp.ok(friendLinkCacheManager.listFriendLinks());
     }
 }
 
