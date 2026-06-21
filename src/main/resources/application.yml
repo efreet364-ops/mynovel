@@ -10,3 +10,5 @@ spring:
       port: 6379
       password:
       database: 1
+jwt:
+  secret: E66559580A1ADF48CDD928516062F12E

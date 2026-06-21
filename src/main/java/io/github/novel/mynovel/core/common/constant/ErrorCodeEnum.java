@@ -52,6 +52,16 @@ public enum ErrorCodeEnum {
      * */
     USER_REQUEST_PARAM_ERROR("A0400","用户请求参数错误"),
 
+    /**
+     * 用户验证码错误
+     */
+    USER_VERIFY_CODE_ERROR("A0240", "用户验证码错误"),
+
+    /**
+     * 用户名已存在
+     */
+    USER_NAME_EXIST("A0111", "用户名已存在"),
+
     // ...省略若干用户端二级宏观错误码
 
     /**
@@ -77,6 +87,7 @@ public enum ErrorCodeEnum {
     MIDDLEWARE_SERVICE_ERROR("C0100","中间件服务出错")
 
     // ...省略若干三方服务调用二级宏观错误码
+
 
     ;
 

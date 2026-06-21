@@ -1,7 +1,10 @@
 package io.github.novel.mynovel.service;
 
+import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.dao.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
+import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 
 /**
  * <p>
@@ -13,4 +16,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserService extends IService<SysUser> {
 
+    /**
+     * 用户注册
+     *
+     * @param dto 注册参数
+     * @return JWT
+     */
+    RestResp<UserRegisterRespDto> register(UserRegisterReqDto dto);
 }
