@@ -35,6 +35,11 @@ public class CacheConsts {
     public static final String HOME_FRIEND_LINK_CACHE_NAME = "homeFriendLinkCache";
 
     /**
+     * 最新新闻缓存
+     */
+    public static final String LATEST_NEWS_CACHE_NAME = "latestNewsCache";
+
+    /**
      * 图片验证码缓存 KEY
      */
     public static final String IMG_VERIFY_CODE_CACHE_KEY =
@@ -47,7 +52,9 @@ public class CacheConsts {
 
         HOME_BOOK_CACHE(1,HOME_BOOK_CACHE_NAME,0,1),
 
-        HOME_FRIEND_LINK_CACHE(2,HOME_FRIEND_LINK_CACHE_NAME,1000,1)
+        HOME_FRIEND_LINK_CACHE(2,HOME_FRIEND_LINK_CACHE_NAME,1000,1),
+
+        LATEST_NEWS_CACHE(0, LATEST_NEWS_CACHE_NAME, 60 * 10, 1)
 
         ;
 

@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 /**
  * 首页推荐小说 缓存管理类
  *
- * @author xiongxiaoyang
- * @date 2022/5/12
  */
 @Component
 @RequiredArgsConstructor

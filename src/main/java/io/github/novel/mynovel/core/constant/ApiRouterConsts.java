@@ -49,6 +49,11 @@ public class ApiRouterConsts {
     public static final String RESOURCE_URL_PREFIX = "/resource";
 
     /**
+     * 首页模块请求路径前缀
+     */
+    public static final String NEWS_URL_PREFIX = "/news";
+
+    /**
      * 前台门户首页API请求路径前缀
      */
     public static final String API_FRONT_HOME_URL_PREFIX = API_FRONT_URL_PREFIX + HOME_URL_PREFIX;
@@ -68,6 +73,11 @@ public class ApiRouterConsts {
      */
     public static final String API_FRONT_RESOURCE_URL_PREFIX =
             API_FRONT_URL_PREFIX + RESOURCE_URL_PREFIX;
+
+    /**
+     * 前台门户新闻相关API请求路径前缀
+     */
+    public static final String API_FRONT_NEWS_URL_PREFIX = API_FRONT_URL_PREFIX + NEWS_URL_PREFIX;
 
     // ...省略若干常量
 

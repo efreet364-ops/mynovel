@@ -2,6 +2,9 @@ package io.github.novel.mynovel.dao.mapper;
 
 import io.github.novel.mynovel.dao.entity.NewsInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.github.novel.mynovel.dto.resp.NewsInfoRespDto;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface NewsInfoMapper extends BaseMapper<NewsInfo> {
 
+    List<NewsInfoRespDto> selectNewsList();
 }

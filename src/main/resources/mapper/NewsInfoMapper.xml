@@ -2,4 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.github.novel.mynovel.dao.mapper.NewsInfoMapper">
 
+    <select id="selectNewsList"
+            resultType="io.github.novel.mynovel.dto.resp.NewsInfoRespDto">
+
+        SELECT
+            ni.id,
+            ni.category_id,
+            ni.category_name,
+            ni.source_name,
+            ni.title,
+            ni.create_time,
+            ni.update_time,
+            nc.content
+        FROM news_info ni
+                 LEFT JOIN news_content nc
+                           ON ni.id = nc.news_id
+        ORDER BY ni.create_time DESC LIMIT 2
+    </select>
 </mapper>
