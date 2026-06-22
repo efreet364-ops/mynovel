@@ -77,7 +77,7 @@ public class BookInfo implements Serializable {
     /**
      * 书籍状态;0-连载中 1-已完结
      */
-    private Byte bookStatus;
+    private Integer bookStatus;
 
     /**
      * 点击量

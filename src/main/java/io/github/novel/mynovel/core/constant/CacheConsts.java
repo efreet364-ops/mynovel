@@ -51,6 +51,11 @@ public class CacheConsts {
     public static final String BOOK_CATEGORY_LIST_CACHE_NAME = "bookCategoryListCache";
 
     /**
+     * 小说信息缓存
+     */
+    public static final String BOOK_INFO_CACHE_NAME = "bookInfoCache";
+
+    /**
      * 缓存配置常量
      */
     public enum CacheEnum {
@@ -61,7 +66,9 @@ public class CacheConsts {
 
         LATEST_NEWS_CACHE(0, LATEST_NEWS_CACHE_NAME, 60 * 10, 1),
 
-        BOOK_CATEGORY_LIST_CACHE(0, BOOK_CATEGORY_LIST_CACHE_NAME, 0, 2)
+        BOOK_CATEGORY_LIST_CACHE(0, BOOK_CATEGORY_LIST_CACHE_NAME, 0, 2),
+
+        BOOK_INFO_CACHE(0, BOOK_INFO_CACHE_NAME, 60 * 60 * 18, 500)
 
         ;
 
