@@ -34,7 +34,7 @@ public class BookChapter implements Serializable {
     /**
      * 章节号
      */
-    private Short chapterNum;
+    private Integer chapterNum;
 
     /**
      * 章节名
@@ -49,7 +49,7 @@ public class BookChapter implements Serializable {
     /**
      * 是否收费;1-收费 0-免费
      */
-    private Byte isVip;
+    private Integer isVip;
 
     private LocalDateTime createTime;
 

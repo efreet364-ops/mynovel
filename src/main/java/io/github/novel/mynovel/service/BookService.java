@@ -2,6 +2,7 @@ package io.github.novel.mynovel.service;
 
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.dto.resp.BookCategoryRespDto;
+import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
 import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
 
 import java.util.List;
@@ -21,4 +22,9 @@ public interface BookService {
      * 小说信息查询
      */
     RestResp<BookInfoRespDto> getBookById(Long bookId);
+
+    /**
+     * 小说章节列表查询
+     */
+    RestResp<List<BookChapterRespDto>> listChapters(Long bookId);
 }

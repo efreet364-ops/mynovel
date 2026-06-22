@@ -3,6 +3,7 @@ package io.github.novel.mynovel.controller.front;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.dto.resp.BookCategoryRespDto;
+import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
 import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
 import io.github.novel.mynovel.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,4 +45,16 @@ public class BookController {
             @Parameter(description = "小说 ID") @PathVariable("id") Long bookId) {
         return bookService.getBookById(bookId);
     }
+
+    /**
+     * 小说章节列表查询接口
+     */
+    @Operation(summary = "小说章节列表查询接口")
+    @GetMapping("chapter/list")
+    public RestResp<List<BookChapterRespDto>> listChapters(
+            @Parameter(description = "小说ID") Long bookId) {
+        return bookService.listChapters(bookId);
+    }
+
+
 }
