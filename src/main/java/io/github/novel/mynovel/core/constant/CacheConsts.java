@@ -46,6 +46,11 @@ public class CacheConsts {
             REDIS_CACHE_PREFIX + "imgVerifyCodeCache::";
 
     /**
+     * 小说分类列表缓存
+     */
+    public static final String BOOK_CATEGORY_LIST_CACHE_NAME = "bookCategoryListCache";
+
+    /**
      * 缓存配置常量
      */
     public enum CacheEnum {
@@ -54,7 +59,9 @@ public class CacheConsts {
 
         HOME_FRIEND_LINK_CACHE(2,HOME_FRIEND_LINK_CACHE_NAME,1000,1),
 
-        LATEST_NEWS_CACHE(0, LATEST_NEWS_CACHE_NAME, 60 * 10, 1)
+        LATEST_NEWS_CACHE(0, LATEST_NEWS_CACHE_NAME, 60 * 10, 1),
+
+        BOOK_CATEGORY_LIST_CACHE(0, BOOK_CATEGORY_LIST_CACHE_NAME, 0, 2)
 
         ;
 

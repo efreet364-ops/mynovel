@@ -5,9 +5,11 @@ import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.dto.resp.NewsInfoRespDto;
 import io.github.novel.mynovel.service.NewsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,5 +36,15 @@ public class NewsController {
     @GetMapping("latest_list")
     public RestResp<List<NewsInfoRespDto>> listLatestNews() {
         return newsService.listLatestNews();
+    }
+
+    /**
+     * 新闻信息查询接口
+     */
+    @Operation(summary = "新闻信息查询接口")
+    @GetMapping("{id}")
+    public RestResp<NewsInfoRespDto> getNews(
+            @Parameter(description = "新闻ID") @PathVariable Long id) {
+        return newsService.getNews(id);
     }
 }

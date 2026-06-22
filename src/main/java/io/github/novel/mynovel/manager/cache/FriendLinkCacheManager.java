@@ -26,8 +26,8 @@ public class FriendLinkCacheManager {
             , value = CacheConsts.HOME_FRIEND_LINK_CACHE_NAME)
     public List<HomeFriendLinkRespDto> listFriendLinks() {
         QueryWrapper<HomeFriendLink> queryWrapper = new QueryWrapper<>();
-        List<HomeFriendLink> homeFriendLinks = homeFriendLinkMapper.selectList(queryWrapper);
         queryWrapper.orderByAsc(DatabaseConsts.CommonColumnEnum.SORT.getName());
+        List<HomeFriendLink> homeFriendLinks = homeFriendLinkMapper.selectList(queryWrapper);
 
         return homeFriendLinks.stream()
                 .map(link -> {
