@@ -81,6 +81,11 @@ public class CacheConsts {
     public static final String BOOK_VISIT_RANK_CACHE_NAME = "bookVisitRankCache";
 
     /**
+     * 最近更新小说ID列表缓存
+     */
+    public static final String LAST_UPDATE_BOOK_ID_LIST_CACHE_NAME = "lastUpdateBookIdListCache";
+
+    /**
      * 缓存配置常量
      */
     public enum CacheEnum {
@@ -103,7 +108,9 @@ public class CacheConsts {
 
         BOOK_VISIT_RANK_CACHE(2, BOOK_VISIT_RANK_CACHE_NAME, 60 * 60 * 6, 1),
 
-        BOOK_UPDATE_RANK_CACHE(0, BOOK_UPDATE_RANK_CACHE_NAME, 60, 1)
+        BOOK_UPDATE_RANK_CACHE(0, BOOK_UPDATE_RANK_CACHE_NAME, 60, 1),
+
+        LAST_UPDATE_BOOK_ID_LIST_CACHE(0, LAST_UPDATE_BOOK_ID_LIST_CACHE_NAME, 60 * 60, 10)
 
         ;
 

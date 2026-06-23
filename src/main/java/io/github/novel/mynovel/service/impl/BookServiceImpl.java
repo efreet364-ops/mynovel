@@ -1,11 +1,12 @@
 package io.github.novel.mynovel.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.dao.entity.BookChapter;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
-import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
 import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.manager.cache.*;
 import io.github.novel.mynovel.service.BookService;
@@ -13,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.management.loading.PrivateClassLoader;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,8 @@ public class BookServiceImpl implements BookService {
     private final BookContentCacheManager bookContentCacheManager;
 
     private final BookRankCacheManager bookRankCacheManager;
+
+    private final Integer REC_BOOK_COUNT = 4;
 
     @Override
     public RestResp<List<BookCategoryRespDto>> listCategory(Integer workDirection) {
@@ -129,6 +132,43 @@ public class BookServiceImpl implements BookService {
     @Override
     public RestResp<List<BookRankRespDto>> listUpdateRankBooks() {
         return RestResp.ok(bookRankCacheManager.listUpdateRankBooks());
+    }
+
+    @Override
+    public RestResp<List<BookInfoRespDto>> listRecBooks(Long bookId) {
+        // 获取当前小说的类型
+        Long categoryId = bookInfoCacheManager.getBookInfo(bookId).getCategoryId();
+        // 获取同类型小说的id列表
+        List<Long> lastUpdateIdList = bookInfoCacheManager.getLastUpdateIdList(categoryId);
+
+        // 检查列表是否为空或不足
+        if (CollectionUtils.isEmpty(lastUpdateIdList)) {
+            return RestResp.ok(Collections.emptyList());
+        }
+
+        // 排除当前书籍
+        List<Long> candidateIdList = lastUpdateIdList.stream()
+                .filter(id -> !id.equals(bookId))
+                .toList();
+
+        if (candidateIdList.isEmpty()) {
+            return RestResp.ok(Collections.emptyList());
+        }
+
+        // 确定实际推荐的书籍数量
+        int actualRecCount = Math.min(REC_BOOK_COUNT, candidateIdList.size());
+
+        // 从候选id中随机挑选出指定数量的id
+        List<Long> recBookIds = RandomUtil.randomEleList(
+                candidateIdList,
+                actualRecCount
+        );
+
+        List<BookInfoRespDto> respDtoList = recBookIds.stream().map(
+                id -> bookInfoCacheManager.getBookInfo(id)
+        ).toList();
+
+        return RestResp.ok(respDtoList);
     }
 
 }

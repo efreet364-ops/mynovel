@@ -110,4 +110,14 @@ public class BookController {
     public RestResp<List<BookRankRespDto>> listUpdateRankBooks() {
         return bookService.listUpdateRankBooks();
     }
+
+    /**
+     * 小说推荐列表查询接口
+     */
+    @Operation(summary = "小说推荐列表查询接口")
+    @GetMapping("rec_list")
+    public RestResp<List<BookInfoRespDto>> listRecBooks(
+            @Parameter(description = "小说ID") Long bookId) {
+        return bookService.listRecBooks(bookId);
+    }
 }

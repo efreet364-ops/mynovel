@@ -70,4 +70,11 @@ public interface BookService {
      * @return 小说更新排行列表
      */
     RestResp<List<BookRankRespDto>> listUpdateRankBooks();
+
+    /**
+     * 小说相关推荐列表查询
+     *
+     * @return 小说相关推荐列表
+     */
+    RestResp<List<BookInfoRespDto>> listRecBooks(Long bookId);
 }
