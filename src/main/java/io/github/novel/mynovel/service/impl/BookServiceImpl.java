@@ -8,14 +8,18 @@ import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
 import io.github.novel.mynovel.dto.resp.BookCategoryRespDto;
 import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
+import io.github.novel.mynovel.dto.resp.BookContentAboutRespDto;
 import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
 import io.github.novel.mynovel.manager.cache.BookCategoryCacheManager;
+import io.github.novel.mynovel.manager.cache.BookChapterCacheManager;
+import io.github.novel.mynovel.manager.cache.BookContentCacheManager;
 import io.github.novel.mynovel.manager.cache.BookInfoCacheManager;
 import io.github.novel.mynovel.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.management.loading.PrivateClassLoader;
 import java.util.List;
 
 @Service
@@ -28,6 +32,10 @@ public class BookServiceImpl implements BookService {
     private final BookInfoCacheManager bookInfoCacheManager;
 
     private final BookChapterMapper bookChapterMapper;
+
+    private final BookChapterCacheManager bookChapterCacheManager;
+
+    private final BookContentCacheManager bookContentCacheManager;
 
     @Override
     public RestResp<List<BookCategoryRespDto>> listCategory(Integer workDirection) {
@@ -50,5 +58,24 @@ public class BookServiceImpl implements BookService {
                         .chapterName(v.getChapterName())
                         .isVip(v.getIsVip())
                         .build()).toList());
+    }
+
+    @Override
+    public RestResp<BookContentAboutRespDto> getBookContentAbout(Long chapterId) {
+        // 查询章节信息
+        BookChapterRespDto chapter = bookChapterCacheManager.getChapter(chapterId);
+        // 查询小说信息
+        BookInfoRespDto bookInfo = bookInfoCacheManager.getBookInfo(chapter.getBookId());
+        // 查询章节内容
+        String bookContent = bookContentCacheManager.getBookContent(chapterId);
+
+        // 组装dto并返回
+        BookContentAboutRespDto res = BookContentAboutRespDto.builder()
+                .bookInfo(bookInfo)
+                .chapterInfo(chapter)
+                .bookContent(bookContent)
+                .build();
+
+        return RestResp.ok(res);
     }
 }

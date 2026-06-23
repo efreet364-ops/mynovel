@@ -4,6 +4,7 @@ import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.dto.resp.BookCategoryRespDto;
 import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
+import io.github.novel.mynovel.dto.resp.BookContentAboutRespDto;
 import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
 import io.github.novel.mynovel.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,5 +57,13 @@ public class BookController {
         return bookService.listChapters(bookId);
     }
 
-
+    /**
+     * 小说内容相关信息查询接口
+     */
+    @Operation(summary = "小说内容相关信息查询接口")
+    @GetMapping("content/{chapterId}")
+    public RestResp<BookContentAboutRespDto> getBookContentAbout(
+            @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId) {
+        return bookService.getBookContentAbout(chapterId);
+    }
 }
