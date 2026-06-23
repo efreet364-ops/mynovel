@@ -77,4 +77,9 @@ public interface BookService {
      * @return 小说相关推荐列表
      */
     RestResp<List<BookInfoRespDto>> listRecBooks(Long bookId);
+
+    /**
+     * 小说最新章节相关信息查询接口
+     */
+    RestResp<BookChapterAboutRespDto> getLastChapterAbout(Long bookId);
 }

@@ -120,4 +120,14 @@ public class BookController {
             @Parameter(description = "小说ID") Long bookId) {
         return bookService.listRecBooks(bookId);
     }
+
+    /**
+     * 小说最新章节相关信息查询接口
+     */
+    @Operation(summary = "小说最新章节相关信息查询接口")
+    @GetMapping("last_chapter/about")
+    public RestResp<BookChapterAboutRespDto> getLastChapterAbout(
+            @Parameter(description = "小说ID") Long bookId) {
+        return bookService.getLastChapterAbout(bookId);
+    }
 }

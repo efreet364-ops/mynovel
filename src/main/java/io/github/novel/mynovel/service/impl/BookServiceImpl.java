@@ -171,4 +171,29 @@ public class BookServiceImpl implements BookService {
         return RestResp.ok(respDtoList);
     }
 
+    @Override
+    public RestResp<BookChapterAboutRespDto> getLastChapterAbout(Long bookId) {
+        // 查询小说信息
+        BookInfoRespDto bookInfo = bookInfoCacheManager.getBookInfo(bookId);
+
+        // 查询最新章节信息
+        BookChapterRespDto bookChapter = bookChapterCacheManager.getChapter(
+                bookInfo.getLastChapterId());
+
+        // 查询章节内容
+        String content = bookContentCacheManager.getBookContent(bookInfo.getLastChapterId());
+
+        // 查询章节总数
+        QueryWrapper<BookChapter> chapterQueryWrapper = new QueryWrapper<>();
+        chapterQueryWrapper.eq(DatabaseConsts.BookChapterTable.COLUMN_BOOK_ID, bookId);
+        Long chapterTotal = bookChapterMapper.selectCount(chapterQueryWrapper);
+
+        // 组装数据并返回
+        return RestResp.ok(BookChapterAboutRespDto.builder()
+                .chapterInfo(bookChapter)
+                .chapterTotal(chapterTotal)
+                .contentSummary(content.substring(0, 30))
+                .build());
+    }
+
 }
