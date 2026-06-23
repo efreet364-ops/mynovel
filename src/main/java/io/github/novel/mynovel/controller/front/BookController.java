@@ -66,4 +66,24 @@ public class BookController {
             @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId) {
         return bookService.getBookContentAbout(chapterId);
     }
+
+    /**
+     * 获取上一章节ID接口
+     */
+    @Operation(summary = "获取上一章节ID接口")
+    @GetMapping("pre_chapter_id/{chapterId}")
+    public RestResp<Long> getPreChapterId(
+            @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId) {
+        return bookService.getPreChapterId(chapterId);
+    }
+
+    /**
+     * 获取下一章节ID接口
+     */
+    @Operation(summary = "获取下一章节ID接口")
+    @GetMapping("next_chapter_id/{chapterId}")
+    public RestResp<Long> getNextChapterId(
+            @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId) {
+        return bookService.getNextChapterId(chapterId);
+    }
 }

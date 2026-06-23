@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.management.loading.PrivateClassLoader;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -77,5 +78,45 @@ public class BookServiceImpl implements BookService {
                 .build();
 
         return RestResp.ok(res);
+    }
+
+    @Override
+    public RestResp<Long> getPreChapterId(Long chapterId) {
+        // 查询小说ID 和 章节号
+        BookChapterRespDto chapter = bookChapterCacheManager.getChapter(chapterId);
+        Long bookId = chapter.getBookId();
+        Integer chapterNum = chapter.getChapterNum();
+
+        // 查询上一章信息并返回章节ID
+        QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.BookChapterTable.COLUMN_BOOK_ID, bookId)
+                .lt(DatabaseConsts.BookChapterTable.COLUMN_CHAPTER_NUM, chapterNum)
+                .orderByDesc(DatabaseConsts.BookChapterTable.COLUMN_CHAPTER_NUM)
+                .last(DatabaseConsts.SqlEnum.LIMIT_1.getSql());
+        return RestResp.ok(
+                Optional.ofNullable(bookChapterMapper.selectOne(queryWrapper))
+                        .map(BookChapter::getId)
+                        .orElse(null)
+        );
+    }
+
+    @Override
+    public RestResp<Long> getNextChapterId(Long chapterId) {
+        // 查询小说ID 和 章节号
+        BookChapterRespDto chapter = bookChapterCacheManager.getChapter(chapterId);
+        Long bookId = chapter.getBookId();
+        Integer chapterNum = chapter.getChapterNum();
+
+        // 查询下一章信息并返回章节ID
+        QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.BookChapterTable.COLUMN_BOOK_ID, bookId)
+                .gt(DatabaseConsts.BookChapterTable.COLUMN_CHAPTER_NUM, chapterNum)
+                .orderByAsc(DatabaseConsts.BookChapterTable.COLUMN_CHAPTER_NUM)
+                .last(DatabaseConsts.SqlEnum.LIMIT_1.getSql());
+        return RestResp.ok(
+                Optional.ofNullable(bookChapterMapper.selectOne(queryWrapper))
+                        .map(BookChapter::getId)
+                        .orElse(null)
+        );
     }
 }

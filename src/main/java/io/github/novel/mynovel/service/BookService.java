@@ -36,4 +36,20 @@ public interface BookService {
      * @return 内容相关联的信息
      */
     RestResp<BookContentAboutRespDto> getBookContentAbout(Long chapterId);
+
+    /**
+     * 获取上一章节ID
+     *
+     * @param chapterId 章节ID
+     * @return 上一章节ID
+     */
+    RestResp<Long> getPreChapterId(Long chapterId);
+
+    /**
+     * 获取下一章节ID
+     *
+     * @param chapterId 章节ID
+     * @return 下一章节ID
+     */
+    RestResp<Long> getNextChapterId(Long chapterId);
 }
