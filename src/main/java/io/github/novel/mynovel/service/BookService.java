@@ -1,10 +1,7 @@
 package io.github.novel.mynovel.service;
 
 import io.github.novel.mynovel.core.common.resp.RestResp;
-import io.github.novel.mynovel.dto.resp.BookCategoryRespDto;
-import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
-import io.github.novel.mynovel.dto.resp.BookContentAboutRespDto;
-import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
+import io.github.novel.mynovel.dto.resp.*;
 
 import java.util.List;
 
@@ -52,4 +49,25 @@ public interface BookService {
      * @return 下一章节ID
      */
     RestResp<Long> getNextChapterId(Long chapterId);
+
+    /**
+     * 小说点击榜查询
+     *
+     * @return 小说点击排行列表
+     */
+    RestResp<List<BookRankRespDto>> listVisitRankBooks();
+
+    /**
+     * 小说新书榜查询
+     *
+     * @return 小说新书排行列表
+     */
+    RestResp<List<BookRankRespDto>> listNewestRankBooks();
+
+    /**
+     * 小说更新榜查询
+     *
+     * @return 小说更新排行列表
+     */
+    RestResp<List<BookRankRespDto>> listUpdateRankBooks();
 }

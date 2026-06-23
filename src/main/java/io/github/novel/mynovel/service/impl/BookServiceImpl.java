@@ -6,14 +6,8 @@ import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.dao.entity.BookChapter;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
-import io.github.novel.mynovel.dto.resp.BookCategoryRespDto;
-import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
-import io.github.novel.mynovel.dto.resp.BookContentAboutRespDto;
-import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
-import io.github.novel.mynovel.manager.cache.BookCategoryCacheManager;
-import io.github.novel.mynovel.manager.cache.BookChapterCacheManager;
-import io.github.novel.mynovel.manager.cache.BookContentCacheManager;
-import io.github.novel.mynovel.manager.cache.BookInfoCacheManager;
+import io.github.novel.mynovel.dto.resp.*;
+import io.github.novel.mynovel.manager.cache.*;
 import io.github.novel.mynovel.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,15 +22,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
 
+    private final BookChapterMapper bookChapterMapper;
+
     private final BookCategoryCacheManager bookCategoryCacheManager;
 
     private final BookInfoCacheManager bookInfoCacheManager;
 
-    private final BookChapterMapper bookChapterMapper;
-
     private final BookChapterCacheManager bookChapterCacheManager;
 
     private final BookContentCacheManager bookContentCacheManager;
+
+    private final BookRankCacheManager bookRankCacheManager;
 
     @Override
     public RestResp<List<BookCategoryRespDto>> listCategory(Integer workDirection) {
@@ -119,4 +115,20 @@ public class BookServiceImpl implements BookService {
                         .orElse(null)
         );
     }
+
+    @Override
+    public RestResp<List<BookRankRespDto>> listVisitRankBooks() {
+        return RestResp.ok(bookRankCacheManager.listVisitRankBooks());
+    }
+
+    @Override
+    public RestResp<List<BookRankRespDto>> listNewestRankBooks() {
+        return RestResp.ok(bookRankCacheManager.listNewestRankBooks());
+    }
+
+    @Override
+    public RestResp<List<BookRankRespDto>> listUpdateRankBooks() {
+        return RestResp.ok(bookRankCacheManager.listUpdateRankBooks());
+    }
+
 }

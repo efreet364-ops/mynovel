@@ -2,10 +2,7 @@ package io.github.novel.mynovel.controller.front;
 
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
-import io.github.novel.mynovel.dto.resp.BookCategoryRespDto;
-import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
-import io.github.novel.mynovel.dto.resp.BookContentAboutRespDto;
-import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
+import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -85,5 +82,32 @@ public class BookController {
     public RestResp<Long> getNextChapterId(
             @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId) {
         return bookService.getNextChapterId(chapterId);
+    }
+
+    /**
+     * 小说点击榜查询接口
+     */
+    @Operation(summary = "小说点击榜查询接口")
+    @GetMapping("visit_rank")
+    public RestResp<List<BookRankRespDto>> listVisitRankBooks() {
+        return bookService.listVisitRankBooks();
+    }
+
+    /**
+     * 小说新书榜查询接口
+     */
+    @Operation(summary = "小说新书榜查询接口")
+    @GetMapping("newest_rank")
+    public RestResp<List<BookRankRespDto>> listNewestRankBooks() {
+        return bookService.listNewestRankBooks();
+    }
+
+    /**
+     * 小说更新榜查询接口
+     */
+    @Operation(summary = "小说更新榜查询接口")
+    @GetMapping("update_rank")
+    public RestResp<List<BookRankRespDto>> listUpdateRankBooks() {
+        return bookService.listUpdateRankBooks();
     }
 }
