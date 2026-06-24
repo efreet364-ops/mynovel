@@ -2,11 +2,15 @@ package io.github.novel.mynovel.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.dao.entity.BookChapter;
+import io.github.novel.mynovel.dao.entity.BookInfo;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
+import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
 import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.manager.cache.*;
 import io.github.novel.mynovel.service.BookService;
@@ -24,6 +28,8 @@ import java.util.Optional;
 public class BookServiceImpl implements BookService {
 
     private final BookChapterMapper bookChapterMapper;
+
+    private final BookInfoMapper bookInfoMapper;
 
     private final BookCategoryCacheManager bookCategoryCacheManager;
 
@@ -194,6 +200,18 @@ public class BookServiceImpl implements BookService {
                 .chapterTotal(chapterTotal)
                 .contentSummary(content.substring(0, 30))
                 .build());
+    }
+
+    @Override
+    public RestResp<Void> addVisitCount(Long bookId) {
+        LambdaUpdateWrapper<BookInfo> updateWrapper =
+                Wrappers.lambdaUpdate();
+
+        updateWrapper.eq(BookInfo::getId, bookId)
+                .setSql("visit_count = visit_count + 1");
+
+        bookInfoMapper.update(null, updateWrapper);
+        return RestResp.ok();
     }
 
 }

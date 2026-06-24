@@ -82,4 +82,9 @@ public interface BookService {
      * 小说最新章节相关信息查询接口
      */
     RestResp<BookChapterAboutRespDto> getLastChapterAbout(Long bookId);
+
+    /**
+     * 增加小说点击量接口
+     */
+    RestResp<Void> addVisitCount(Long bookId);
 }

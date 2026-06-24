@@ -7,10 +7,7 @@ import io.github.novel.mynovel.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -129,5 +126,14 @@ public class BookController {
     public RestResp<BookChapterAboutRespDto> getLastChapterAbout(
             @Parameter(description = "小说ID") Long bookId) {
         return bookService.getLastChapterAbout(bookId);
+    }
+
+    /**
+     * 增加小说点击量接口
+     */
+    @Operation(summary = "增加小说点击量接口")
+    @PostMapping("visit")
+    public RestResp<Void> addVisitCount(@Parameter(description = "小说ID") Long bookId) {
+        return bookService.addVisitCount(bookId);
     }
 }
