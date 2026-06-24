@@ -3,6 +3,14 @@ spring:
     url: jdbc:mysql://localhost:3307/novel?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 123
+
+#  jackson:
+#    generator:
+#      # JSON 序列化时，将所有 Number 类型的属性都转为 String 类型返回，避免前端数据精度丢失的问题。颗粒度过大，待后续优化。
+#      # 由于 Javascript 标准规定所有数字处理都应使用 64 位 IEEE 754 浮点值完成，
+#      # 结果是某些 64 位整数值无法准确表示（尾数只有 51 位宽）
+#      write-numbers-as-strings: true
+
   data:
     # Redis ??
     redis:
@@ -10,5 +18,7 @@ spring:
       port: 6379
       password:
       database: 1
+
+
 jwt:
   secret: E66559580A1ADF48CDD928516062F12E
