@@ -15,6 +15,7 @@ import io.github.novel.mynovel.dao.mapper.UserInfoMapper;
 import io.github.novel.mynovel.dto.req.UserLoginReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
 import io.github.novel.mynovel.dto.resp.UserInfoRespDto;
+import io.github.novel.mynovel.dto.req.UserInfoUptReqDto;
 import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 import io.github.novel.mynovel.manager.VerifyCodeManager;
@@ -124,5 +125,16 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                 .userSex(userInfo.getUserSex())
                 .userPhoto(userInfo.getUserPhoto())
                 .build());
+    }
+
+    @Override
+    public RestResp<Void> updateUserInfo(UserInfoUptReqDto dto) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(dto.getUserId());
+        userInfo.setNickName(dto.getNickName());
+        userInfo.setUserPhoto(dto.getUserPhoto());
+        userInfo.setUserSex(dto.getUserSex());
+        userInfoMapper.updateById(userInfo);
+        return RestResp.ok();
     }
 }

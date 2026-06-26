@@ -7,6 +7,7 @@ import io.github.novel.mynovel.core.constant.SystemConfigConsts;
 import io.github.novel.mynovel.dto.req.UserLoginReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
 import io.github.novel.mynovel.dto.resp.UserInfoRespDto;
+import io.github.novel.mynovel.dto.req.UserInfoUptReqDto;
 import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 import io.github.novel.mynovel.service.UserService;
@@ -60,5 +61,15 @@ public class UserController {
     @GetMapping
     public RestResp<UserInfoRespDto> getUserInfo() {
         return userService.getUserInfo(UserHolder.getUserId());
+    }
+
+    /**
+     * 用户信息修改接口
+     */
+    @Operation(summary = "用户信息修改接口")
+    @PutMapping
+    public RestResp<Void> updateUserInfo(@Valid @RequestBody UserInfoUptReqDto dto) {
+        dto.setUserId(UserHolder.getUserId());
+        return userService.updateUserInfo(dto);
     }
 }
