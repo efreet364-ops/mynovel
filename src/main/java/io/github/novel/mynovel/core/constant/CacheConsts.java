@@ -86,6 +86,11 @@ public class CacheConsts {
     public static final String LAST_UPDATE_BOOK_ID_LIST_CACHE_NAME = "lastUpdateBookIdListCache";
 
     /**
+     * 用户信息缓存
+     */
+    public static final String USER_INFO_CACHE_NAME = "userInfoCache";
+
+    /**
      * 缓存配置常量
      */
     public enum CacheEnum {

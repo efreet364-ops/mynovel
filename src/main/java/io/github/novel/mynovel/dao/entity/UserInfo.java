@@ -54,7 +54,7 @@ public class UserInfo implements Serializable {
     /**
      * 用户性别;0-男 1-女
      */
-    private Byte userSex;
+    private Integer userSex;
 
     /**
      * 账户余额
@@ -64,7 +64,7 @@ public class UserInfo implements Serializable {
     /**
      * 用户状态;0-正常
      */
-    private Byte status;
+    private Integer status;
 
     /**
      * 创建时间

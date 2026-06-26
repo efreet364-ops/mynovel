@@ -72,6 +72,11 @@ public enum ErrorCodeEnum {
      */
     USER_PASSWORD_ERROR("A0210", "用户密码错误"),
 
+    /**
+     * 用户登录已过期
+     */
+    USER_LOGIN_EXPIRED("A0230", "用户登录已过期"),
+
     // ...省略若干用户端二级宏观错误码
 
     /**
@@ -94,7 +99,8 @@ public enum ErrorCodeEnum {
     /**
      * 一级宏观错误码，中间件服务出错
      * */
-    MIDDLEWARE_SERVICE_ERROR("C0100","中间件服务出错")
+    MIDDLEWARE_SERVICE_ERROR("C0100","中间件服务出错"),
+
 
     // ...省略若干三方服务调用二级宏观错误码
 
