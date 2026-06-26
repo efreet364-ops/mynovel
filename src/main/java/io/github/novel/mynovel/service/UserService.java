@@ -5,6 +5,7 @@ import io.github.novel.mynovel.dao.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import io.github.novel.mynovel.dto.req.UserLoginReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
+import io.github.novel.mynovel.dto.resp.UserInfoRespDto;
 import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 
@@ -34,6 +35,9 @@ public interface UserService extends IService<SysUser> {
      */
     RestResp<UserLoginRespDto> login(UserLoginReqDto dto);
 
-
+    /**
+     * 用户信息查询接口
+     */
+    RestResp<UserInfoRespDto> getUserInfo(Long userId);
 
 }

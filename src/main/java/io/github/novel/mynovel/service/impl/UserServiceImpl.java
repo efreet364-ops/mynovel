@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.novel.mynovel.dao.mapper.UserInfoMapper;
 import io.github.novel.mynovel.dto.req.UserLoginReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
+import io.github.novel.mynovel.dto.resp.UserInfoRespDto;
 import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 import io.github.novel.mynovel.manager.VerifyCodeManager;
@@ -113,5 +114,15 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                         .token(jwtUtils.generateToken(userInfo.getId(),SystemConfigConsts.NOVEL_FRONT_KEY))
                         .build()
         );
+    }
+
+    @Override
+    public RestResp<UserInfoRespDto> getUserInfo(Long userId) {
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+        return RestResp.ok(UserInfoRespDto.builder()
+                .nickName(userInfo.getNickName())
+                .userSex(userInfo.getUserSex())
+                .userPhoto(userInfo.getUserPhoto())
+                .build());
     }
 }
