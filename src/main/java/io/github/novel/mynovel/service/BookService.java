@@ -1,7 +1,10 @@
 package io.github.novel.mynovel.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import io.github.novel.mynovel.core.common.resp.RestResp;
+import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -87,4 +90,12 @@ public interface BookService {
      * 增加小说点击量接口
      */
     RestResp<Void> addVisitCount(Long bookId);
+
+    /**
+     * 发表评论
+     *
+     * @param dto 评论相关 DTO
+     * @return void
+     */
+    RestResp<Void> saveComment(@Valid UserCommentReqDto dto);
 }

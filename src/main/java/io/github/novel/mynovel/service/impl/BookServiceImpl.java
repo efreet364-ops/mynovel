@@ -1,16 +1,23 @@
 package io.github.novel.mynovel.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.github.novel.mynovel.core.annotation.Key;
+import io.github.novel.mynovel.core.annotation.Lock;
+import io.github.novel.mynovel.core.common.constant.ErrorCodeEnum;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.dao.entity.BookChapter;
+import io.github.novel.mynovel.dao.entity.BookComment;
 import io.github.novel.mynovel.dao.entity.BookInfo;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
+import io.github.novel.mynovel.dao.mapper.BookCommentMapper;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
+import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.manager.cache.*;
 import io.github.novel.mynovel.service.BookService;
@@ -18,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +38,8 @@ public class BookServiceImpl implements BookService {
     private final BookChapterMapper bookChapterMapper;
 
     private final BookInfoMapper bookInfoMapper;
+
+    private final BookCommentMapper bookCommentMapper;
 
     private final BookCategoryCacheManager bookCategoryCacheManager;
 
@@ -211,6 +221,31 @@ public class BookServiceImpl implements BookService {
                 .setSql("visit_count = visit_count + 1");
 
         bookInfoMapper.update(null, updateWrapper);
+        return RestResp.ok();
+    }
+
+    @Override
+    @Lock(prefix = "userComment")
+    public RestResp<Void> saveComment(@Key(expr = "#{userId + '::' + bookId}") UserCommentReqDto dto) {
+        // 校验书籍存在
+        BookInfo bookInfo = bookInfoMapper.selectById(dto.getBookId());
+        if (bookInfo == null) {
+            return RestResp.fail(ErrorCodeEnum.BOOK_NOT_FOUND);
+        }
+
+        // 校验用户是否已发表评论
+        QueryWrapper<BookComment> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.BookCommentTable.COLUMN_USER_ID, dto.getUserId())
+                .eq(DatabaseConsts.BookCommentTable.COLUMN_BOOK_ID, dto.getBookId());
+        if (bookCommentMapper.selectCount(queryWrapper) > 0) {
+            // 用户已发表评论
+            return RestResp.fail(ErrorCodeEnum.USER_COMMENTED);
+        }
+
+        BookComment bookComment = BeanUtil.copyProperties(dto, BookComment.class);
+        bookComment.setCreateTime(LocalDateTime.now());
+        bookComment.setUpdateTime(LocalDateTime.now());
+        bookCommentMapper.insert(bookComment);
         return RestResp.ok();
     }
 
