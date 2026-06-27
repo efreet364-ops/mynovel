@@ -12,6 +12,8 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -52,25 +54,32 @@ public class CacheConfig {
     public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
         RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory);
 
+        RedisSerializationContext.SerializationPair<Object> valueSerializer =
+                RedisSerializationContext.SerializationPair.fromSerializer(
+                        new GenericJackson2JsonRedisSerializer()
+                );
+
         RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .disableCachingNullValues().prefixCacheNameWith(CacheConsts.REDIS_CACHE_PREFIX);
+                .disableCachingNullValues()
+                .prefixCacheNameWith(CacheConsts.REDIS_CACHE_PREFIX)
+                .serializeValuesWith(valueSerializer);
+
 
         Map<String, RedisCacheConfiguration> cacheMap = new LinkedHashMap<>(CacheConsts.CacheEnum.values().length);
         for (CacheConsts.CacheEnum c : CacheConsts.CacheEnum.values()) {
             if (c.isRemote()) {
+                RedisCacheConfiguration cacheConfig = defaultCacheConfig;
                 if (c.getTtl() > 0) {
-                    cacheMap.put(c.getName(), RedisCacheConfiguration.defaultCacheConfig().disableCachingNullValues()
-                            .prefixCacheNameWith(CacheConsts.REDIS_CACHE_PREFIX).entryTtl(Duration.ofSeconds(c.getTtl())));
-                } else {
-                    cacheMap.put(c.getName(), RedisCacheConfiguration.defaultCacheConfig().disableCachingNullValues()
-                            .prefixCacheNameWith(CacheConsts.REDIS_CACHE_PREFIX));
+                    defaultCacheConfig.entryTtl(Duration.ofSeconds(c.getTtl()));
                 }
+                cacheMap.put(c.getName(), cacheConfig);
             }
         }
 
         RedisCacheManager redisCacheManager = new RedisCacheManager(redisCacheWriter, defaultCacheConfig, cacheMap);
         redisCacheManager.setTransactionAware(true);
         redisCacheManager.initializeCaches();
+
         return redisCacheManager;
     }
 }

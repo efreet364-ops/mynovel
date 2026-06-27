@@ -95,6 +95,8 @@ public class CacheConsts {
      */
     public enum CacheEnum {
 
+        USER_INFO_CACHE(2, USER_INFO_CACHE_NAME, 60 * 60 * 24, 10000),
+
         HOME_BOOK_CACHE(1,HOME_BOOK_CACHE_NAME,0,1),
 
         HOME_FRIEND_LINK_CACHE(2,HOME_FRIEND_LINK_CACHE_NAME,1000,1),

@@ -68,6 +68,11 @@ public enum ErrorCodeEnum {
     USER_ACCOUNT_NOT_EXIST("A0201", "用户账号不存在"),
 
     /**
+     * 用户评论异常
+     */
+    USER_COMMENTED("A2001", "用户已发表评论"),
+
+    /**
      * 用户密码错误
      */
     USER_PASSWORD_ERROR("A0210", "用户密码错误"),
@@ -76,6 +81,11 @@ public enum ErrorCodeEnum {
      * 用户登录已过期
      */
     USER_LOGIN_EXPIRED("A0230", "用户登录已过期"),
+
+    /**
+     * 小说不存在
+     */
+    BOOK_NOT_FOUND("A2002", "小说ID不存在"),
 
     // ...省略若干用户端二级宏观错误码
 
