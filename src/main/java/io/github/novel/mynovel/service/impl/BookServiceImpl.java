@@ -14,12 +14,14 @@ import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.dao.entity.BookChapter;
 import io.github.novel.mynovel.dao.entity.BookComment;
 import io.github.novel.mynovel.dao.entity.BookInfo;
+import io.github.novel.mynovel.dao.entity.UserInfo;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
 import io.github.novel.mynovel.dao.mapper.BookCommentMapper;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.manager.cache.*;
+import io.github.novel.mynovel.manager.dao.UserDaoManager;
 import io.github.novel.mynovel.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -40,6 +45,8 @@ public class BookServiceImpl implements BookService {
     private final BookInfoMapper bookInfoMapper;
 
     private final BookCommentMapper bookCommentMapper;
+
+    private final UserDaoManager userDaoManager;
 
     private final BookCategoryCacheManager bookCategoryCacheManager;
 
@@ -267,6 +274,43 @@ public class BookServiceImpl implements BookService {
         bookComment.setCommentContent(content);
         bookCommentMapper.update(bookComment, queryWrapper);
         return RestResp.ok();
+    }
+
+    @Override
+    public RestResp<BookCommentRespDto> listNewestComments(Long bookId) {
+        // 查询评论总数
+        QueryWrapper<BookComment> commentCountQueryWrapper = new QueryWrapper<>();
+        commentCountQueryWrapper.eq(DatabaseConsts.BookCommentTable.COLUMN_BOOK_ID, bookId);
+        Long commentTotal = bookCommentMapper.selectCount(commentCountQueryWrapper);
+        BookCommentRespDto bookCommentRespDto = BookCommentRespDto.builder()
+                .commentTotal(commentTotal).build();
+
+        if (commentTotal > 0) {
+            // 查询最新评论列表
+            QueryWrapper<BookComment> commentQueryWrapper = new QueryWrapper<>();
+            commentQueryWrapper.eq(DatabaseConsts.BookCommentTable.COLUMN_BOOK_ID, bookId)
+                    .orderByDesc(DatabaseConsts.CommonColumnEnum.CREATE_TIME.getName())
+                    .last(DatabaseConsts.SqlEnum.LIMIT_5.getSql());
+            List<BookComment> bookComments = bookCommentMapper.selectList(commentQueryWrapper);
+
+            // 查询评论用户信息，并设置需要返回的评论用户名
+            List<Long> userIds = bookComments.stream().map(BookComment::getUserId).toList();
+            List<UserInfo> userInfos = userDaoManager.listUsers(userIds);
+            Map<Long, UserInfo> userInfoMap = userInfos.stream()
+                    .collect(Collectors.toMap(UserInfo::getId, Function.identity()));
+            List<BookCommentRespDto.CommentInfo> commentInfos = bookComments.stream()
+                    .map(v -> BookCommentRespDto.CommentInfo.builder()
+                            .id(v.getId())
+                            .commentUserId(v.getUserId())
+                            .commentUser(userInfoMap.get(v.getUserId()).getUsername())
+                            .commentUserPhoto(userInfoMap.get(v.getUserId()).getUserPhoto())
+                            .commentContent(v.getCommentContent())
+                            .commentTime(v.getCreateTime()).build()).toList();
+            bookCommentRespDto.setComments(commentInfos);
+    } else {
+        bookCommentRespDto.setComments(Collections.emptyList());
+    }
+        return RestResp.ok(bookCommentRespDto);
     }
 
 }

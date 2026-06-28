@@ -136,4 +136,14 @@ public class BookController {
     public RestResp<Void> addVisitCount(@Parameter(description = "小说ID") Long bookId) {
         return bookService.addVisitCount(bookId);
     }
+
+    /**
+     * 小说最新评论查询接口
+     */
+    @Operation(summary = "小说最新评论查询接口")
+    @GetMapping("comment/newest_list")
+    public RestResp<BookCommentRespDto> listNewestComments(
+            @Parameter(description = "小说ID") Long bookId) {
+        return bookService.listNewestComments(bookId);
+    }
 }
