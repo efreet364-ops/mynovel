@@ -14,6 +14,7 @@ import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 import io.github.novel.mynovel.service.BookService;
 import io.github.novel.mynovel.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -85,5 +86,24 @@ public class UserController {
     public RestResp<Void> comment(@Valid @RequestBody UserCommentReqDto dto) {
         dto.setUserId(UserHolder.getUserId());
         return bookService.saveComment(dto);
+    }
+
+    /**
+     * 修改评论接口
+     */
+    @Operation(summary = "修改评论接口")
+    @PutMapping("comment/{id}")
+    public RestResp<Void> updateComment(@Parameter(description = "评论ID") @PathVariable Long id,
+                                        String content) {
+        return bookService.updateComment(UserHolder.getUserId(), id, content);
+    }
+
+    /**
+     * 删除评论接口
+     */
+    @Operation(summary = "删除评论接口")
+    @DeleteMapping("comment/{id}")
+    public RestResp<Void> deleteComment(@Parameter(description = "评论ID") @PathVariable Long id) {
+        return bookService.deleteComment(UserHolder.getUserId(), id);
     }
 }

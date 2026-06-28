@@ -98,4 +98,23 @@ public interface BookService {
      * @return void
      */
     RestResp<Void> saveComment(@Valid UserCommentReqDto dto);
+
+    /**
+     * 删除评论
+     *
+     * @param userId    评论用户ID
+     * @param commentId 评论ID
+     * @return void
+     */
+    RestResp<Void> deleteComment(Long userId, Long commentId);
+
+    /**
+     * 修改评论
+     *
+     * @param userId  用户ID
+     * @param id      评论ID
+     * @param content 修改后的评论内容
+     * @return void
+     */
+    RestResp<Void> updateComment(Long userId, Long id, String content);
 }

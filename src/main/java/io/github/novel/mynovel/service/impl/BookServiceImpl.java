@@ -225,7 +225,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Lock(prefix = "userComment")
+    @Lock(prefix = "userComment", failCode = ErrorCodeEnum.USER_COMMENTED)
     public RestResp<Void> saveComment(@Key(expr = "#{userId + '::' + bookId}") UserCommentReqDto dto) {
         // 校验书籍存在
         BookInfo bookInfo = bookInfoMapper.selectById(dto.getBookId());
@@ -246,6 +246,26 @@ public class BookServiceImpl implements BookService {
         bookComment.setCreateTime(LocalDateTime.now());
         bookComment.setUpdateTime(LocalDateTime.now());
         bookCommentMapper.insert(bookComment);
+        return RestResp.ok();
+    }
+
+    @Override
+    public RestResp<Void> deleteComment(Long userId, Long commentId) {
+        QueryWrapper<BookComment> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.CommonColumnEnum.ID.getName(), commentId)
+                .eq(DatabaseConsts.BookCommentTable.COLUMN_USER_ID, userId);
+        bookCommentMapper.delete(queryWrapper);
+        return RestResp.ok();
+    }
+
+    @Override
+    public RestResp<Void> updateComment(Long userId, Long id, String content) {
+        QueryWrapper<BookComment> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.CommonColumnEnum.ID.getName(), id)
+                .eq(DatabaseConsts.BookCommentTable.COLUMN_USER_ID, userId);
+        BookComment bookComment = new BookComment();
+        bookComment.setCommentContent(content);
+        bookCommentMapper.update(bookComment, queryWrapper);
         return RestResp.ok();
     }
 
