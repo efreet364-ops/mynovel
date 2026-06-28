@@ -4,17 +4,17 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.github.novel.mynovel.core.annotation.Key;
 import io.github.novel.mynovel.core.annotation.Lock;
 import io.github.novel.mynovel.core.common.constant.ErrorCodeEnum;
+import io.github.novel.mynovel.core.common.req.PageReqDto;
+import io.github.novel.mynovel.core.common.resp.PageRespDto;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.DatabaseConsts;
-import io.github.novel.mynovel.dao.entity.BookChapter;
-import io.github.novel.mynovel.dao.entity.BookComment;
-import io.github.novel.mynovel.dao.entity.BookInfo;
-import io.github.novel.mynovel.dao.entity.UserInfo;
+import io.github.novel.mynovel.dao.entity.*;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
 import io.github.novel.mynovel.dao.mapper.BookCommentMapper;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
@@ -311,6 +311,47 @@ public class BookServiceImpl implements BookService {
         bookCommentRespDto.setComments(Collections.emptyList());
     }
         return RestResp.ok(bookCommentRespDto);
+    }
+
+    @Override
+    public RestResp<PageRespDto<UserCommentRespDto>> listComments(Long userId, PageReqDto pageReqDto) {
+        QueryWrapper<BookComment> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.BookCommentTable.COLUMN_USER_ID, userId)
+                .orderByDesc(DatabaseConsts.CommonColumnEnum.CREATE_TIME.getName());
+
+        List<BookComment> comments;
+        long total;
+        if (pageReqDto.isFetchAll()) {
+            comments = bookCommentMapper.selectList(queryWrapper);
+            total = comments.size();
+        } else {
+            Page<BookComment> page = new Page<>(pageReqDto.getPageNum(), pageReqDto.getPageSize());
+            Page<BookComment> commentPage = bookCommentMapper.selectPage(page, queryWrapper);
+            comments = commentPage.getRecords();
+            total = commentPage.getTotal();
+        }
+
+        if (CollectionUtils.isEmpty(comments)) {
+            return RestResp.ok(PageRespDto.of(pageReqDto.getPageNum(), pageReqDto.getPageSize(), total,
+                    Collections.emptyList()));
+        }
+
+        List<Long> bookIds = comments.stream().map(BookComment::getBookId).distinct().toList();
+        Map<Long, BookInfo> bookInfoMap = bookInfoMapper.selectBatchIds(bookIds).stream()
+                .collect(Collectors.toMap(BookInfo::getId, Function.identity()));
+
+        List<UserCommentRespDto> userComments = comments.stream()
+                .map(comment -> {
+                    BookInfo bookInfo = bookInfoMap.get(comment.getBookId());
+                    return UserCommentRespDto.builder()
+                            .commentContent(comment.getCommentContent())
+                            .commentBookPic(Optional.ofNullable(bookInfo).map(BookInfo::getPicUrl).orElse(null))
+                            .commentBook(Optional.ofNullable(bookInfo).map(BookInfo::getBookName).orElse(null))
+                            .commentTime(comment.getCreateTime())
+                            .build();
+                }).toList();
+
+        return RestResp.ok(PageRespDto.of(pageReqDto.getPageNum(), pageReqDto.getPageSize(), total, userComments));
     }
 
 }

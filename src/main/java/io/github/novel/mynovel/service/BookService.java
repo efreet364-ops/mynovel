@@ -1,6 +1,8 @@
 package io.github.novel.mynovel.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import io.github.novel.mynovel.core.common.req.PageReqDto;
+import io.github.novel.mynovel.core.common.resp.PageRespDto;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
@@ -125,4 +127,12 @@ public interface BookService {
      * @return 小说最新评论数据
      */
     RestResp<BookCommentRespDto> listNewestComments(Long bookId);
+
+    /**
+     * 分页查询评论
+     * @param userId
+     * @param pageReqDto
+     * @return
+     */
+    RestResp<PageRespDto<UserCommentRespDto>> listComments(Long userId, PageReqDto pageReqDto);
 }

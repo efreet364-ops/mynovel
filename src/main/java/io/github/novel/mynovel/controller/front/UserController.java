@@ -1,12 +1,15 @@
 package io.github.novel.mynovel.controller.front;
 
 import io.github.novel.mynovel.core.auth.UserHolder;
+import io.github.novel.mynovel.core.common.req.PageReqDto;
+import io.github.novel.mynovel.core.common.resp.PageRespDto;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.core.constant.SystemConfigConsts;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.req.UserLoginReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
+import io.github.novel.mynovel.dto.resp.UserCommentRespDto;
 import io.github.novel.mynovel.dto.resp.UserInfoRespDto;
 import io.github.novel.mynovel.dto.req.UserInfoUptReqDto;
 import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
@@ -105,5 +108,14 @@ public class UserController {
     @DeleteMapping("comment/{id}")
     public RestResp<Void> deleteComment(@Parameter(description = "评论ID") @PathVariable Long id) {
         return bookService.deleteComment(UserHolder.getUserId(), id);
+    }
+
+    /**
+     * 分页查询评论
+     */
+    @Operation(summary = "查询会员评论列表接口")
+    @GetMapping("comments")
+    public RestResp<PageRespDto<UserCommentRespDto>> listComments(PageReqDto pageReqDto) {
+        return bookService.listComments(UserHolder.getUserId(), pageReqDto);
     }
 }
