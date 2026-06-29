@@ -150,6 +150,12 @@
             <artifactId>spring-expression</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibabacloud-oss-v2</artifactId>
+            <version>0.5.0</version>
+        </dependency>
+
     </dependencies>
 
 
