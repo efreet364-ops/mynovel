@@ -87,6 +87,11 @@ public enum ErrorCodeEnum {
      */
     BOOK_NOT_FOUND("A2002", "小说ID不存在"),
 
+    /**
+     * 访问未授权
+     */
+    USER_UN_AUTH("A0301", "访问未授权"),
+
     // ...省略若干用户端二级宏观错误码
 
     /**

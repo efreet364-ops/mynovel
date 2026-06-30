@@ -91,11 +91,18 @@ public class CacheConsts {
     public static final String USER_INFO_CACHE_NAME = "userInfoCache";
 
     /**
+     * 作家信息缓存
+     */
+    public static final String AUTHOR_INFO_CACHE_NAME = "authorInfoCache";
+
+    /**
      * 缓存配置常量
      */
     public enum CacheEnum {
 
         USER_INFO_CACHE(2, USER_INFO_CACHE_NAME, 60 * 60 * 24, 10000),
+
+        AUTHOR_INFO_CACHE(2, AUTHOR_INFO_CACHE_NAME, 60 * 60 * 48, 1000),
 
         HOME_BOOK_CACHE(1,HOME_BOOK_CACHE_NAME,0,1),
 

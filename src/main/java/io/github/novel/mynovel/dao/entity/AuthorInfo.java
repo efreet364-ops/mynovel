@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("author_info")
+@Builder
 public class AuthorInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -62,12 +65,12 @@ public class AuthorInfo implements Serializable {
     /**
      * 作品方向;0-男频 1-女频
      */
-    private Byte workDirection;
+    private Integer workDirection;
 
     /**
      * 0：正常;1-封禁
      */
-    private Byte status;
+    private Integer status;
 
     /**
      * 创建时间
