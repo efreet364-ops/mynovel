@@ -11,7 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -74,6 +76,6 @@ public class BookRankCacheManager {
             respDto.setLastChapterUpdateTime(v.getLastChapterUpdateTime());
             respDto.setWordCount(v.getWordCount());
             return respDto;
-        }).toList();
+        }).collect(Collectors.toCollection(ArrayList::new));
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
  * Mybatis-Plus 配置类
  */
 @Configuration
-@MapperScan("io.github.novel.mynovel.dao.mapper")
 public class MybatisPlusConfig {
 
     /**

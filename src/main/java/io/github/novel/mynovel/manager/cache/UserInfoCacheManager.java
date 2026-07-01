@@ -16,7 +16,8 @@ public class UserInfoCacheManager {
 
     private final UserInfoMapper userInfoMapper;
 
-    @Cacheable(cacheManager = CacheConsts.REDIS_CACHE_MANAGER, value = CacheConsts.USER_INFO_CACHE_NAME)
+    @Cacheable(cacheManager = CacheConsts.REDIS_CACHE_MANAGER,
+            value = CacheConsts.USER_INFO_CACHE_NAME, unless = "#result == null")
     public UserInfoDto getUser(Long userId) {
         UserInfo userInfo = userInfoMapper.selectById(userId);
         if (Objects.isNull(userInfo)) {

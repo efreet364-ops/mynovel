@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 友情链接 缓存管理类
@@ -36,7 +38,7 @@ public class FriendLinkCacheManager {
                     dto.setLinkUrl(link.getLinkUrl());
                     return dto;
                 })
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
     }
 }
