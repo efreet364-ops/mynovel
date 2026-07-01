@@ -2,13 +2,16 @@ package io.github.novel.mynovel.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.github.novel.mynovel.core.annotation.Key;
 import io.github.novel.mynovel.core.annotation.Lock;
+import io.github.novel.mynovel.core.auth.UserHolder;
 import io.github.novel.mynovel.core.common.constant.ErrorCodeEnum;
 import io.github.novel.mynovel.core.common.req.PageReqDto;
 import io.github.novel.mynovel.core.common.resp.PageRespDto;
@@ -352,6 +355,23 @@ public class BookServiceImpl implements BookService {
                 }).toList();
 
         return RestResp.ok(PageRespDto.of(pageReqDto.getPageNum(), pageReqDto.getPageSize(), total, userComments));
+    }
+
+    @Override
+    public RestResp<PageRespDto<BookInfoRespDto>> listAuthorBooks(PageReqDto dto) {
+        IPage<BookInfo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        LambdaQueryWrapper<BookInfo> query = new LambdaQueryWrapper<>();
+        query.eq(BookInfo::getAuthorId, UserHolder.getAuthorId())
+                .orderByDesc(BookInfo::getCreateTime);
+        IPage<BookInfo> bookInfoIPage = bookInfoMapper.selectPage(page, query);
+
+        List<BookInfoRespDto> list = bookInfoIPage.getRecords().stream()
+                .map(bookInfo -> BeanUtil.copyProperties(bookInfo, BookInfoRespDto.class))
+                .toList();
+
+        return RestResp.ok(
+                PageRespDto.of(dto.getPageNum(), dto.getPageSize(), bookInfoIPage.getTotal(), list)
+        );
     }
 
 }

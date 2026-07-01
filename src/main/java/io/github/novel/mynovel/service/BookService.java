@@ -135,4 +135,13 @@ public interface BookService {
      * @return
      */
     RestResp<PageRespDto<UserCommentRespDto>> listComments(Long userId, PageReqDto pageReqDto);
+
+    /**
+     * 查询作家发布小说列表
+     *
+     * @param dto 分页请求参数
+     * @return 小说分页列表数据
+     */
+    RestResp<PageRespDto<BookInfoRespDto>> listAuthorBooks(PageReqDto dto);
+
 }
