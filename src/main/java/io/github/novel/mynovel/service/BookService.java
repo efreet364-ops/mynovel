@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import io.github.novel.mynovel.core.common.req.PageReqDto;
 import io.github.novel.mynovel.core.common.resp.PageRespDto;
 import io.github.novel.mynovel.core.common.resp.RestResp;
+import io.github.novel.mynovel.dto.req.BookAddReqDto;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
 import jakarta.validation.Valid;
@@ -143,5 +144,13 @@ public interface BookService {
      * @return 小说分页列表数据
      */
     RestResp<PageRespDto<BookInfoRespDto>> listAuthorBooks(PageReqDto dto);
+
+    /**
+     * 小说发布接口
+     *
+     * @param dto 小说发布请求DTO
+     * @return void
+     */
+    RestResp<Void> saveBook(BookAddReqDto dto);
 
 }

@@ -7,6 +7,7 @@ import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.core.constant.SystemConfigConsts;
 import io.github.novel.mynovel.dto.req.AuthorRegisterReqDto;
+import io.github.novel.mynovel.dto.req.BookAddReqDto;
 import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
 import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
@@ -58,4 +59,14 @@ public class AuthorController {
     public RestResp<PageRespDto<BookInfoRespDto>> listBooks(@ParameterObject PageReqDto dto) {
         return bookService.listAuthorBooks(dto);
     }
+
+    /**
+     * 小说发布接口
+     */
+    @Operation(summary = "小说发布接口")
+    @PostMapping("book")
+    public RestResp<Void> publishBook(@Valid @RequestBody BookAddReqDto dto) {
+        return bookService.saveBook(dto);
+    }
+
 }

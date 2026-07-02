@@ -21,6 +21,8 @@ import io.github.novel.mynovel.dao.entity.*;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
 import io.github.novel.mynovel.dao.mapper.BookCommentMapper;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
+import io.github.novel.mynovel.dto.AuthorInfoDto;
+import io.github.novel.mynovel.dto.req.BookAddReqDto;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.manager.cache.*;
@@ -34,6 +36,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -60,6 +63,8 @@ public class BookServiceImpl implements BookService {
     private final BookContentCacheManager bookContentCacheManager;
 
     private final BookRankCacheManager bookRankCacheManager;
+
+    private final AuthorInfoCacheManager authorInfoCacheManager;
 
     private final Integer REC_BOOK_COUNT = 4;
 
@@ -372,6 +377,53 @@ public class BookServiceImpl implements BookService {
         return RestResp.ok(
                 PageRespDto.of(dto.getPageNum(), dto.getPageSize(), bookInfoIPage.getTotal(), list)
         );
+    }
+
+    @Override
+    public RestResp<Void> saveBook(BookAddReqDto dto) {
+        // 获取当前作家ID
+        Long authorId = UserHolder.getAuthorId();
+        if (authorId == null) {
+            return RestResp.fail(ErrorCodeEnum.AUTHOR_STATUS_ERROR);
+        }
+
+        // 校验作家状态（0-正常，1-封禁）
+        AuthorInfoDto authorInfo = authorInfoCacheManager.getAuthor(UserHolder.getUserId());
+        if (authorInfo == null || !Objects.equals(authorInfo.getStatus(), 0)) {
+            return RestResp.fail(ErrorCodeEnum.AUTHOR_STATUS_ERROR);
+        }
+
+        // 校验同一作者下小说名是否已存在
+        LambdaQueryWrapper<BookInfo> nameCheckWrapper = Wrappers.lambdaQuery();
+        nameCheckWrapper.eq(BookInfo::getAuthorId, authorId)
+                .eq(BookInfo::getBookName, dto.getBookName());
+        if (bookInfoMapper.selectCount(nameCheckWrapper) > 0) {
+            return RestResp.fail(ErrorCodeEnum.BOOK_NAME_EXIST);
+        }
+
+        // 构建小说实体
+        BookInfo bookInfo = new BookInfo();
+        bookInfo.setWorkDirection(dto.getWorkDirection().byteValue());
+        bookInfo.setCategoryId(dto.getCategoryId());
+        bookInfo.setCategoryName(dto.getCategoryName());
+        bookInfo.setPicUrl(dto.getPicUrl());
+        bookInfo.setBookName(dto.getBookName());
+        bookInfo.setAuthorId(authorId);
+        bookInfo.setAuthorName(authorInfo.getPenName());
+        bookInfo.setBookDesc(dto.getBookDesc());
+        bookInfo.setScore(0);
+        bookInfo.setBookStatus(0);
+        bookInfo.setVisitCount(0L);
+        bookInfo.setWordCount(0);
+        bookInfo.setCommentCount(0);
+        bookInfo.setIsVip(dto.getIsVip());
+        bookInfo.setCreateTime(LocalDateTime.now());
+        bookInfo.setUpdateTime(LocalDateTime.now());
+
+        // 保存到数据库
+        bookInfoMapper.insert(bookInfo);
+
+        return RestResp.ok();
     }
 
 }

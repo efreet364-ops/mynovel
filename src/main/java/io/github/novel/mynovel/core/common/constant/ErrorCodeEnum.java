@@ -88,6 +88,16 @@ public enum ErrorCodeEnum {
     BOOK_NOT_FOUND("A2002", "小说ID不存在"),
 
     /**
+     * 作家状态异常
+     */
+    AUTHOR_STATUS_ERROR("A2003", "作家状态异常"),
+
+    /**
+     * 小说名已存在
+     */
+    BOOK_NAME_EXIST("A2004", "小说名已存在"),
+
+    /**
      * 访问未授权
      */
     USER_UN_AUTH("A0301", "访问未授权"),

@@ -72,7 +72,7 @@ public class BookInfo implements Serializable {
     /**
      * 评分;总分:10 ，真实评分 = score/10
      */
-    private Byte score;
+    private Integer score;
 
     /**
      * 书籍状态;0-连载中 1-已完结
@@ -112,7 +112,7 @@ public class BookInfo implements Serializable {
     /**
      * 是否收费;1-收费 0-免费
      */
-    private Byte isVip;
+    private Integer isVip;
 
     /**
      * 创建时间
