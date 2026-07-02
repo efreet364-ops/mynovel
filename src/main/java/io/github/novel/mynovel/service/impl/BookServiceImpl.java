@@ -34,6 +34,7 @@ import io.github.novel.mynovel.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -384,6 +385,7 @@ public class BookServiceImpl implements BookService {
         );
     }
 
+    @Transactional
     @Override
     public RestResp<Void> saveBook(BookAddReqDto dto) {
         // 获取当前作家ID
@@ -481,6 +483,7 @@ public class BookServiceImpl implements BookService {
         return RestResp.ok();
     }
 
+    @Transactional
     @Override
     public RestResp<Void> deleteBookChapter(Long chapterId) {
         // 查询章节信息
@@ -531,6 +534,7 @@ public class BookServiceImpl implements BookService {
                 .build());
     }
 
+    @Transactional
     @Override
     public RestResp<Void> updateBookChapter(Long chapterId, ChapterUpdateReqDto dto) {
         // 查询章节信息
