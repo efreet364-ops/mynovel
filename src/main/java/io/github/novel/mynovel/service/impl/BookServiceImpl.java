@@ -20,9 +20,12 @@ import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.dao.entity.*;
 import io.github.novel.mynovel.dao.mapper.BookChapterMapper;
 import io.github.novel.mynovel.dao.mapper.BookCommentMapper;
+import io.github.novel.mynovel.dao.mapper.BookContentMapper;
 import io.github.novel.mynovel.dao.mapper.BookInfoMapper;
 import io.github.novel.mynovel.dto.AuthorInfoDto;
 import io.github.novel.mynovel.dto.req.BookAddReqDto;
+import io.github.novel.mynovel.dto.req.ChapterAddReqDto;
+import io.github.novel.mynovel.dto.req.ChapterUpdateReqDto;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.manager.cache.*;
@@ -47,6 +50,8 @@ import java.util.stream.Collectors;
 public class BookServiceImpl implements BookService {
 
     private final BookChapterMapper bookChapterMapper;
+
+    private final BookContentMapper bookContentMapper;
 
     private final BookInfoMapper bookInfoMapper;
 
@@ -424,6 +429,178 @@ public class BookServiceImpl implements BookService {
         bookInfoMapper.insert(bookInfo);
 
         return RestResp.ok();
+    }
+
+    @Override
+    public RestResp<Void> saveBookChapter(ChapterAddReqDto dto) {
+        // 校验小说是否存在且属于当前作家
+        BookInfo bookInfo = bookInfoMapper.selectById(dto.getBookId());
+        Long authorId = UserHolder.getAuthorId();
+        if (bookInfo == null || !bookInfo.getAuthorId().equals(authorId)) {
+            return RestResp.fail(ErrorCodeEnum.BOOK_NOT_FOUND);
+        }
+
+        // 获取当前最大章节号
+        QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.BookChapterTable.COLUMN_BOOK_ID, dto.getBookId())
+                .orderByDesc(DatabaseConsts.BookChapterTable.COLUMN_CHAPTER_NUM)
+                .last(DatabaseConsts.SqlEnum.LIMIT_1.getSql());
+        BookChapter lastChapter = bookChapterMapper.selectOne(queryWrapper);
+        int nextChapterNum = (lastChapter == null) ? 1 : lastChapter.getChapterNum() + 1;
+
+        // 保存章节信息
+        BookChapter bookChapter = new BookChapter();
+        bookChapter.setBookId(dto.getBookId());
+        bookChapter.setChapterNum(nextChapterNum);
+        bookChapter.setChapterName(dto.getChapterName());
+        bookChapter.setWordCount(dto.getChapterContent().length());
+        bookChapter.setIsVip(dto.getIsVip());
+        bookChapter.setCreateTime(LocalDateTime.now());
+        bookChapter.setUpdateTime(LocalDateTime.now());
+        bookChapterMapper.insert(bookChapter);
+
+        // 保存章节内容
+        BookContent bookContent = new BookContent();
+        bookContent.setChapterId(bookChapter.getId());
+        bookContent.setContent(dto.getChapterContent());
+        bookContent.setCreateTime(LocalDateTime.now());
+        bookContent.setUpdateTime(LocalDateTime.now());
+        bookContentMapper.insert(bookContent);
+
+        // 更新小说信息（总字数、最新章节）
+        bookInfo.setWordCount(bookInfo.getWordCount() + bookChapter.getWordCount());
+        bookInfo.setLastChapterId(bookChapter.getId());
+        bookInfo.setLastChapterName(bookChapter.getChapterName());
+        bookInfo.setLastChapterUpdateTime(LocalDateTime.now());
+        bookInfo.setUpdateTime(LocalDateTime.now());
+        bookInfoMapper.updateById(bookInfo);
+
+        // 清除缓存
+        bookInfoCacheManager.evictBookInfoCache(dto.getBookId());
+
+        return RestResp.ok();
+    }
+
+    @Override
+    public RestResp<Void> deleteBookChapter(Long chapterId) {
+        // 查询章节信息
+        BookChapter bookChapter = bookChapterMapper.selectById(chapterId);
+        if (bookChapter == null) {
+            return RestResp.fail(ErrorCodeEnum.BOOK_NOT_FOUND);
+        }
+
+        // 校验小说是否属于当前作家
+        BookInfo bookInfo = bookInfoMapper.selectById(bookChapter.getBookId());
+        Long authorId = UserHolder.getAuthorId();
+        if (bookInfo == null || !bookInfo.getAuthorId().equals(authorId)) {
+            return RestResp.fail(ErrorCodeEnum.BOOK_NOT_FOUND);
+        }
+
+        // 删除章节内容
+        QueryWrapper<BookContent> contentQueryWrapper = new QueryWrapper<>();
+        contentQueryWrapper.eq(DatabaseConsts.BookContentTable.COLUMN_CHAPTER_ID, chapterId);
+        bookContentMapper.delete(contentQueryWrapper);
+
+        // 删除章节
+        bookChapterMapper.deleteById(chapterId);
+
+        // 更新小说总字数
+        bookInfo.setWordCount(Math.max(0, bookInfo.getWordCount() - bookChapter.getWordCount()));
+        bookInfo.setUpdateTime(LocalDateTime.now());
+        bookInfoMapper.updateById(bookInfo);
+
+        // 清除缓存
+        bookChapterCacheManager.evictBookChapterCache(chapterId);
+        bookContentCacheManager.evictBookContentCache(chapterId);
+        bookInfoCacheManager.evictBookInfoCache(bookChapter.getBookId());
+
+        return RestResp.ok();
+    }
+
+    @Override
+    public RestResp<ChapterContentRespDto> getBookChapter(Long chapterId) {
+        // 从缓存获取章节信息
+        BookChapterRespDto chapter = bookChapterCacheManager.getChapter(chapterId);
+        // 从缓存获取章节内容
+        String content = bookContentCacheManager.getBookContent(chapterId);
+
+        return RestResp.ok(ChapterContentRespDto.builder()
+                .chapterName(chapter.getChapterName())
+                .chapterContent(content)
+                .isVip(chapter.getIsVip())
+                .build());
+    }
+
+    @Override
+    public RestResp<Void> updateBookChapter(Long chapterId, ChapterUpdateReqDto dto) {
+        // 查询章节信息
+        BookChapter bookChapter = bookChapterMapper.selectById(chapterId);
+        if (bookChapter == null) {
+            return RestResp.fail(ErrorCodeEnum.BOOK_NOT_FOUND);
+        }
+
+        // 校验小说是否属于当前作家
+        BookInfo bookInfo = bookInfoMapper.selectById(bookChapter.getBookId());
+        Long authorId = UserHolder.getAuthorId();
+        if (bookInfo == null || !bookInfo.getAuthorId().equals(authorId)) {
+            return RestResp.fail(ErrorCodeEnum.BOOK_NOT_FOUND);
+        }
+
+        // 更新章节信息
+        int oldWordCount = bookChapter.getWordCount();
+        bookChapter.setChapterName(dto.getChapterName());
+        bookChapter.setWordCount(dto.getChapterContent().length());
+        bookChapter.setIsVip(dto.getIsVip());
+        bookChapter.setUpdateTime(LocalDateTime.now());
+        bookChapterMapper.updateById(bookChapter);
+
+        // 更新章节内容
+        QueryWrapper<BookContent> contentQueryWrapper = new QueryWrapper<>();
+        contentQueryWrapper.eq(DatabaseConsts.BookContentTable.COLUMN_CHAPTER_ID, chapterId);
+        BookContent bookContent = bookContentMapper.selectOne(contentQueryWrapper);
+        if (bookContent != null) {
+            bookContent.setContent(dto.getChapterContent());
+            bookContent.setUpdateTime(LocalDateTime.now());
+            bookContentMapper.update(bookContent, contentQueryWrapper);
+        }
+
+        // 更新小说总字数
+        int newWordCount = bookChapter.getWordCount();
+        bookInfo.setWordCount(Math.max(0, bookInfo.getWordCount() - oldWordCount + newWordCount));
+        bookInfo.setUpdateTime(LocalDateTime.now());
+        bookInfoMapper.updateById(bookInfo);
+
+        // 清除缓存
+        bookChapterCacheManager.evictBookChapterCache(chapterId);
+        bookContentCacheManager.evictBookContentCache(chapterId);
+        bookInfoCacheManager.evictBookInfoCache(bookChapter.getBookId());
+
+        return RestResp.ok();
+    }
+
+    @Override
+    public RestResp<PageRespDto<BookChapterRespDto>> listBookChapters(Long bookId, PageReqDto dto) {
+        IPage<BookChapter> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(DatabaseConsts.BookChapterTable.COLUMN_BOOK_ID, bookId)
+                .orderByAsc(DatabaseConsts.BookChapterTable.COLUMN_CHAPTER_NUM);
+        IPage<BookChapter> chapterPage = bookChapterMapper.selectPage(page, queryWrapper);
+
+        List<BookChapterRespDto> list = chapterPage.getRecords().stream()
+                .map(chapter -> BookChapterRespDto.builder()
+                        .id(chapter.getId())
+                        .bookId(chapter.getBookId())
+                        .chapterNum(chapter.getChapterNum())
+                        .chapterName(chapter.getChapterName())
+                        .chapterWordCount(chapter.getWordCount())
+                        .chapterUpdateTime(chapter.getUpdateTime())
+                        .isVip(chapter.getIsVip())
+                        .build())
+                .toList();
+
+        return RestResp.ok(
+                PageRespDto.of(dto.getPageNum(), dto.getPageSize(), chapterPage.getTotal(), list)
+        );
     }
 
 }

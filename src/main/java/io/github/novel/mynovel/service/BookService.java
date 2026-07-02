@@ -5,6 +5,8 @@ import io.github.novel.mynovel.core.common.req.PageReqDto;
 import io.github.novel.mynovel.core.common.resp.PageRespDto;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.dto.req.BookAddReqDto;
+import io.github.novel.mynovel.dto.req.ChapterAddReqDto;
+import io.github.novel.mynovel.dto.req.ChapterUpdateReqDto;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
 import jakarta.validation.Valid;
@@ -152,5 +154,47 @@ public interface BookService {
      * @return void
      */
     RestResp<Void> saveBook(BookAddReqDto dto);
+
+    /**
+     * 小说章节保存接口
+     *
+     * @param dto 章节发布请求DTO
+     * @return void
+     */
+    RestResp<Void> saveBookChapter(ChapterAddReqDto dto);
+
+    /**
+     * 小说章节删除接口
+     *
+     * @param chapterId 章节ID
+     * @return void
+     */
+    RestResp<Void> deleteBookChapter(Long chapterId);
+
+    /**
+     * 小说章节查询接口
+     *
+     * @param chapterId 章节ID
+     * @return 章节内容响应DTO
+     */
+    RestResp<ChapterContentRespDto> getBookChapter(Long chapterId);
+
+    /**
+     * 小说章节更新接口
+     *
+     * @param chapterId 章节ID
+     * @param dto       章节更新请求DTO
+     * @return void
+     */
+    RestResp<Void> updateBookChapter(Long chapterId, ChapterUpdateReqDto dto);
+
+    /**
+     * 小说章节发布列表查询接口
+     *
+     * @param bookId 小说ID
+     * @param dto    分页请求参数
+     * @return 章节分页列表数据
+     */
+    RestResp<PageRespDto<BookChapterRespDto>> listBookChapters(Long bookId, PageReqDto dto);
 
 }

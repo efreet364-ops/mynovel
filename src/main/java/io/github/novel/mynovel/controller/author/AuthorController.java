@@ -6,14 +6,15 @@ import io.github.novel.mynovel.core.common.resp.PageRespDto;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.core.constant.SystemConfigConsts;
-import io.github.novel.mynovel.dto.req.AuthorRegisterReqDto;
-import io.github.novel.mynovel.dto.req.BookAddReqDto;
-import io.github.novel.mynovel.dto.req.UserRegisterReqDto;
+import io.github.novel.mynovel.dto.req.*;
+import io.github.novel.mynovel.dto.resp.BookChapterRespDto;
 import io.github.novel.mynovel.dto.resp.BookInfoRespDto;
+import io.github.novel.mynovel.dto.resp.ChapterContentRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
 import io.github.novel.mynovel.service.AuthorService;
 import io.github.novel.mynovel.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -69,4 +70,57 @@ public class AuthorController {
         return bookService.saveBook(dto);
     }
 
+    /**
+     * 小说章节发布接口
+     */
+    @Operation(summary = "小说章节发布接口")
+    @PostMapping("book/chapter/{bookId}")
+    public RestResp<Void> publishBookChapter(
+            @Parameter(description = "小说ID") @PathVariable("bookId") Long bookId,
+            @Valid @RequestBody ChapterAddReqDto dto) {
+        dto.setBookId(bookId);
+        return bookService.saveBookChapter(dto);
+    }
+
+    /**
+     * 小说章节删除接口
+     */
+    @Operation(summary = "小说章节删除接口")
+    @DeleteMapping("book/chapter/{chapterId}")
+    public RestResp<Void> deleteBookChapter(
+            @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId) {
+        return bookService.deleteBookChapter(chapterId);
+    }
+
+    /**
+     * 小说章节查询接口
+     */
+    @Operation(summary = "小说章节查询接口")
+    @GetMapping("book/chapter/{chapterId}")
+    public RestResp<ChapterContentRespDto> getBookChapter(
+            @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId) {
+        return bookService.getBookChapter(chapterId);
+    }
+
+    /**
+     * 小说章节更新接口
+     */
+    @Operation(summary = "小说章节更新接口")
+    @PutMapping("book/chapter/{chapterId}")
+    public RestResp<Void> updateBookChapter(
+            @Parameter(description = "章节ID") @PathVariable("chapterId") Long chapterId,
+            @Valid @RequestBody ChapterUpdateReqDto dto) {
+        return bookService.updateBookChapter(chapterId, dto);
+    }
+
+    /**
+     * 小说章节发布列表查询接口
+     */
+    @Operation(summary = "小说章节发布列表查询接口")
+    @GetMapping("book/chapters/{bookId}")
+    public RestResp<PageRespDto<BookChapterRespDto>> listBookChapters(
+            @Parameter(description = "小说ID") @PathVariable("bookId") Long bookId,
+            @ParameterObject PageReqDto dto) {
+        return bookService.listBookChapters(bookId, dto);
+    }
 }
