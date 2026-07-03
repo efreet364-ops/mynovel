@@ -7,6 +7,7 @@ import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.core.constant.SystemConfigConsts;
 import io.github.novel.mynovel.core.util.JwtUtils;
+import io.github.novel.mynovel.core.util.JwtUtils.RefreshTokenData;
 import io.github.novel.mynovel.dao.entity.SysUser;
 import io.github.novel.mynovel.dao.entity.UserInfo;
 import io.github.novel.mynovel.dao.mapper.SysUserMapper;
@@ -18,6 +19,7 @@ import io.github.novel.mynovel.dto.resp.UserInfoRespDto;
 import io.github.novel.mynovel.dto.req.UserInfoUptReqDto;
 import io.github.novel.mynovel.dto.resp.UserLoginRespDto;
 import io.github.novel.mynovel.dto.resp.UserRegisterRespDto;
+import io.github.novel.mynovel.manager.RefreshTokenManager;
 import io.github.novel.mynovel.manager.VerifyCodeManager;
 import io.github.novel.mynovel.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     private final UserInfoMapper userInfoMapper;
 
     private final JwtUtils jwtUtils;
+
+    private final RefreshTokenManager refreshTokenManager;
 
     @Override
     public RestResp<UserRegisterRespDto> register(UserRegisterReqDto dto) {
@@ -78,10 +82,18 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
         // 删除验证码
         verifyCodeManager.removeImgVerifyCode(dto.getSessionId());
 
+        // 生成双 Token
+        Long uid = userInfo.getId();
+        String accessToken = jwtUtils.generateAccessToken(uid, SystemConfigConsts.NOVEL_FRONT_KEY);
+        String refreshToken = jwtUtils.generateRefreshToken(uid);
+        RefreshTokenData refreshTokenData = jwtUtils.parseRefreshToken(refreshToken);
+        refreshTokenManager.saveRefreshToken(refreshTokenData.tokenId(), uid);
+
         return RestResp.ok(
                 UserRegisterRespDto.builder()
-                        .token(jwtUtils.generateToken(userInfo.getId(), SystemConfigConsts.NOVEL_FRONT_KEY))
-                        .uid(userInfo.getId())
+                        .token(accessToken)
+                        .refreshToken(refreshToken)
+                        .uid(uid)
                         .build()
         );
 
@@ -107,14 +119,81 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
             throw new BusinessException(ErrorCodeEnum.USER_PASSWORD_ERROR);
         }
 
-        // 登录成功，生成并返回JWT
+        // 登录成功，生成双 Token
+        Long uid = userInfo.getId();
+        String accessToken = jwtUtils.generateAccessToken(uid, SystemConfigConsts.NOVEL_FRONT_KEY);
+        String refreshToken = jwtUtils.generateRefreshToken(uid);
+        RefreshTokenData refreshTokenData = jwtUtils.parseRefreshToken(refreshToken);
+        refreshTokenManager.saveRefreshToken(refreshTokenData.tokenId(), uid);
+
         return RestResp.ok(
                 UserLoginRespDto.builder()
-                        .uid(userInfo.getId())
+                        .uid(uid)
                         .nickName(userInfo.getNickName())
-                        .token(jwtUtils.generateToken(userInfo.getId(),SystemConfigConsts.NOVEL_FRONT_KEY))
+                        .token(accessToken)
+                        .refreshToken(refreshToken)
                         .build()
         );
+    }
+
+    @Override
+    public RestResp<UserLoginRespDto> refreshToken(String refreshToken) {
+        // 解析 Refresh Token（JWT 层验证）
+        RefreshTokenData refreshTokenData;
+        try {
+            refreshTokenData = jwtUtils.parseRefreshToken(refreshToken);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new BusinessException(ErrorCodeEnum.REFRESH_TOKEN_INVALID);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCodeEnum.REFRESH_TOKEN_INVALID);
+        }
+
+        // Redis 层验证
+        Long userId = refreshTokenManager.validateRefreshToken(refreshTokenData.tokenId());
+        if (userId == null) {
+            throw new BusinessException(ErrorCodeEnum.REFRESH_TOKEN_INVALID);
+        }
+
+        // 生成新 Token 对
+        String newAccessToken = jwtUtils.generateAccessToken(userId, SystemConfigConsts.NOVEL_FRONT_KEY);
+        String newRefreshToken = jwtUtils.generateRefreshToken(userId);
+        RefreshTokenData newRefreshTokenData = jwtUtils.parseRefreshToken(newRefreshToken);
+
+        // 轮换：删除旧 Refresh Token，保存新 Refresh Token（防止重放攻击）
+        refreshTokenManager.rotateRefreshToken(
+                refreshTokenData.tokenId(), newRefreshTokenData.tokenId(), userId);
+
+        // 获取用户昵称
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+
+        return RestResp.ok(
+                UserLoginRespDto.builder()
+                        .uid(userId)
+                        .nickName(userInfo != null ? userInfo.getNickName() : null)
+                        .token(newAccessToken)
+                        .refreshToken(newRefreshToken)
+                        .build()
+        );
+    }
+
+    @Override
+    public RestResp<Void> logout(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return RestResp.ok();
+        }
+
+        // 解析 Refresh Token 获取 tokenId
+        RefreshTokenData refreshTokenData;
+        try {
+            refreshTokenData = jwtUtils.parseRefreshToken(refreshToken);
+        } catch (Exception e) {
+            // Refresh Token 无效，不报错，直接返回成功
+            return RestResp.ok();
+        }
+
+        // 从 Redis 删除 Refresh Token
+        refreshTokenManager.removeRefreshToken(refreshTokenData.tokenId());
+        return RestResp.ok();
     }
 
     @Override

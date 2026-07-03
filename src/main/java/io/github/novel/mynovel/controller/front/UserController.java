@@ -24,6 +24,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * <p>
  * 系统用户 控制器
@@ -60,6 +62,26 @@ public class UserController {
     @PostMapping("login")
     public RestResp<UserLoginRespDto> login(@Valid @RequestBody UserLoginReqDto dto) {
         return userService.login(dto);
+    }
+
+    /**
+     * Token 刷新接口（使用 Refresh Token 换取新的 Access Token + Refresh Token）
+     */
+    @Operation(summary = "Token 刷新接口")
+    @PostMapping("token/refresh")
+    public RestResp<UserLoginRespDto> refreshToken(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refreshToken");
+        return userService.refreshToken(refreshToken);
+    }
+
+    /**
+     * 退出登录接口
+     */
+    @Operation(summary = "退出登录接口")
+    @PostMapping("logout")
+    public RestResp<Void> logout(@RequestBody(required = false) Map<String, String> body) {
+        String refreshToken = body != null ? body.get("refreshToken") : null;
+        return userService.logout(refreshToken);
     }
 
     /**

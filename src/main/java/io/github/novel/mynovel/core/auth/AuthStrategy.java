@@ -26,7 +26,7 @@ public interface AuthStrategy {
      *
      * @param jwtUtils             jwt 工具
      * @param userInfoCacheManager 用户缓存管理对象
-     * @param token                token 登录 token
+     * @param token                token 登录 token（Access Token）
      * @return 用户ID
      */
     default Long authSSO(JwtUtils jwtUtils, UserInfoCacheManager userInfoCacheManager,
@@ -35,7 +35,16 @@ public interface AuthStrategy {
             // token 为空
             throw new BusinessException(ErrorCodeEnum.USER_LOGIN_EXPIRED);
         }
-        Long userId = jwtUtils.parseToken(token, SystemConfigConsts.NOVEL_FRONT_KEY);
+        Long userId;
+        try {
+            userId = jwtUtils.parseAccessToken(token, SystemConfigConsts.NOVEL_FRONT_KEY);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Access Token 过期，前端应使用 Refresh Token 刷新
+            throw new BusinessException(ErrorCodeEnum.TOKEN_EXPIRED);
+        } catch (Exception e) {
+            // 其他 JWT 解析异常（签名错误、格式错误等）统一视为无效 token
+            throw new BusinessException(ErrorCodeEnum.USER_LOGIN_EXPIRED);
+        }
         if (Objects.isNull(userId)) {
             // token 解析失败
             throw new BusinessException(ErrorCodeEnum.USER_LOGIN_EXPIRED);

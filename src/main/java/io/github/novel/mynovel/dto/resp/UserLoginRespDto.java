@@ -20,4 +20,7 @@ public class UserLoginRespDto {
 
     @Schema(description = "用户token")
     private String token;
+
+    @Schema(description = "Refresh Token（用于刷新 Access Token）")
+    private String refreshToken;
 }

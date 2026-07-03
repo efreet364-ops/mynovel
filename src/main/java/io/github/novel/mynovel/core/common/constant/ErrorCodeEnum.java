@@ -102,6 +102,16 @@ public enum ErrorCodeEnum {
      */
     USER_UN_AUTH("A0301", "访问未授权"),
 
+    /**
+     * Token 已过期（Access Token 过期，前端应使用 Refresh Token 刷新）
+     */
+    TOKEN_EXPIRED("A0231", "Token已过期"),
+
+    /**
+     * Refresh Token 无效
+     */
+    REFRESH_TOKEN_INVALID("A0232", "RefreshToken无效"),
+
     // ...省略若干用户端二级宏观错误码
 
     /**

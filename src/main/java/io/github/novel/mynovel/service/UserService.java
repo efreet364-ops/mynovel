@@ -25,7 +25,7 @@ public interface UserService extends IService<SysUser> {
      * 用户注册
      *
      * @param dto 注册参数
-     * @return JWT
+     * @return JWT + 昵称
      */
     RestResp<UserRegisterRespDto> register(UserRegisterReqDto dto);
 
@@ -33,7 +33,7 @@ public interface UserService extends IService<SysUser> {
      * 用户登录
      *
      * @param dto 登录参数
-     * @return JWT + 昵称
+     * @return JWT + RefreshToken + 昵称
      */
     RestResp<UserLoginRespDto> login(UserLoginReqDto dto);
 
@@ -49,4 +49,20 @@ public interface UserService extends IService<SysUser> {
      * @return void
      */
     RestResp<Void> updateUserInfo(@Valid UserInfoUptReqDto dto);
+
+    /**
+     * 刷新 Token（使用 Refresh Token 换取新的 Access Token + Refresh Token）
+     *
+     * @param refreshToken 旧的 Refresh Token
+     * @return 新的 Token 对
+     */
+    RestResp<UserLoginRespDto> refreshToken(String refreshToken);
+
+    /**
+     * 退出登录（撤销 Refresh Token）
+     *
+     * @param refreshToken 当前的 Refresh Token
+     * @return void
+     */
+    RestResp<Void> logout(String refreshToken);
 }
