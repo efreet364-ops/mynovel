@@ -410,7 +410,7 @@ public class BookServiceImpl implements BookService {
 
         // 构建小说实体
         BookInfo bookInfo = new BookInfo();
-        bookInfo.setWorkDirection(dto.getWorkDirection().byteValue());
+        bookInfo.setWorkDirection(dto.getWorkDirection());
         bookInfo.setCategoryId(dto.getCategoryId());
         bookInfo.setCategoryName(dto.getCategoryName());
         bookInfo.setPicUrl(dto.getPicUrl());

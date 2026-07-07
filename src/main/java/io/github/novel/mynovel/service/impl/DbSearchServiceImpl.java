@@ -21,7 +21,7 @@ import java.util.List;
  * @author xiongxiaoyang
  * @date 2022/5/23
  */
-//@ConditionalOnProperty(prefix = "spring.elasticsearch", name = "enabled", havingValue = "false")
+@ConditionalOnProperty(prefix = "spring.elasticsearch", name = "enabled", havingValue = "false")
 @Service
 @RequiredArgsConstructor
 @Slf4j
