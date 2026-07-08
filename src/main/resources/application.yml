@@ -13,12 +13,18 @@ spring:
     password: 123
 
   data:
-    # Redis ??
+    # Redis
     redis:
       host: 127.0.0.1
       port: 6379
       # password:
       database: 1
+
+  # elasticsearch
+  elasticsearch:
+    # 是否开启 Elasticsearch 搜索引擎功能：true-开启 false-不开启
+    enabled: true
+    uris: http://localhost:9200
 
 
 jwt:

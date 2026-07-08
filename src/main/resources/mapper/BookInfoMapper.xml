@@ -31,5 +31,26 @@
         <if test="condition.updateTimeMin != null">
             and last_chapter_update_time >= #{condition.updateTimeMin}
         </if>
+        <choose>
+            <when test="condition.sort == 'last_chapter_update_time'">
+                order by last_chapter_update_time
+            </when>
+            <when test="condition.sort == 'word_count'">
+                order by word_count
+            </when>
+            <when test="condition.sort == 'visit_count'">
+                order by visit_count
+            </when>
+        </choose>
+        <if test="condition.sort == 'last_chapter_update_time' or condition.sort == 'word_count' or condition.sort == 'visit_count'">
+            <choose>
+                <when test="condition.order == 'asc' or condition.order == 'ASC'">
+                    asc
+                </when>
+                <otherwise>
+                    desc
+                </otherwise>
+            </choose>
+        </if>
     </select>
 </mapper>

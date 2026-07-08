@@ -32,7 +32,7 @@ public class BookInfo implements Serializable {
     /**
      * 作品方向;0-男频 1-女频
      */
-    private Byte workDirection;
+    private Integer workDirection;
 
     /**
      * 类别ID
