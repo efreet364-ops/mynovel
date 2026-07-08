@@ -20,6 +20,18 @@ spring:
       # password:
       database: 1
 
+  # Spring AMQP 配置
+  amqp:
+    # 是否开启 Spring AMQP：true-开启 false-不开启
+    enabled: true
+
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672 # 端口
+    virtual-host: /novel # 虚拟主机
+    username: efreet # 用户名
+    password: 123456 # 密码
+
   # elasticsearch
   elasticsearch:
     # 是否开启 Elasticsearch 搜索引擎功能：true-开启 false-不开启

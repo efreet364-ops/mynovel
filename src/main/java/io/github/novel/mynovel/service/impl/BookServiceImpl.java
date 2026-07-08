@@ -30,6 +30,7 @@ import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
 import io.github.novel.mynovel.manager.cache.*;
 import io.github.novel.mynovel.manager.dao.UserDaoManager;
+import io.github.novel.mynovel.manager.mq.AmqpMsgManager;
 import io.github.novel.mynovel.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,8 @@ public class BookServiceImpl implements BookService {
     private final BookInfoMapper bookInfoMapper;
 
     private final BookCommentMapper bookCommentMapper;
+
+    private final AmqpMsgManager amqpMsgManager;
 
     private final UserDaoManager userDaoManager;
 
@@ -480,6 +483,9 @@ public class BookServiceImpl implements BookService {
         // 清除缓存
         bookInfoCacheManager.evictBookInfoCache(dto.getBookId());
 
+        // 发送小说信息更新的mq消息
+        amqpMsgManager.sendBookChangeMsg(dto.getBookId());
+
         return RestResp.ok();
     }
 
@@ -516,6 +522,9 @@ public class BookServiceImpl implements BookService {
         bookChapterCacheManager.evictBookChapterCache(chapterId);
         bookContentCacheManager.evictBookContentCache(chapterId);
         bookInfoCacheManager.evictBookInfoCache(bookChapter.getBookId());
+
+        // 发送小说信息更新的mq消息
+        amqpMsgManager.sendBookChangeMsg(bookChapter.getBookId());
 
         return RestResp.ok();
     }
@@ -578,6 +587,9 @@ public class BookServiceImpl implements BookService {
         bookChapterCacheManager.evictBookChapterCache(chapterId);
         bookContentCacheManager.evictBookContentCache(chapterId);
         bookInfoCacheManager.evictBookInfoCache(bookChapter.getBookId());
+
+        // 发送小说信息更新的mq消息
+        amqpMsgManager.sendBookChangeMsg(bookChapter.getBookId());
 
         return RestResp.ok();
     }
