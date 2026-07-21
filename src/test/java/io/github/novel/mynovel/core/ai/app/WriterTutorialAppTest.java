@@ -23,6 +23,6 @@ class WriterTutorialAppTest {
         String content2 = writerTutorialApp.doChat("你会写小说吗", chatId);
 
         String content3 = writerTutorialApp.doChat("我是谁", chatId);
-        Assertions.assertNotNull(content3);
+        Assertions.assertNotNull(content1);
     }
 }

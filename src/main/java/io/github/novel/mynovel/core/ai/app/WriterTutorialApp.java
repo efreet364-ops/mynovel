@@ -1,5 +1,6 @@
 package io.github.novel.mynovel.core.ai.app;
 
+import io.github.novel.mynovel.core.ai.advisors.MyLoggerAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -28,6 +29,7 @@ public class WriterTutorialApp {
 
         chatclient = ChatClient.builder(dashScopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
+                .defaultAdvisors(new MyLoggerAdvisor())
                 .build();
     }
 
