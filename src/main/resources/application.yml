@@ -30,7 +30,7 @@ spring:
   # Spring AMQP 配置
   amqp:
     # 是否开启 Spring AMQP：true-开启 false-不开启
-    enabled: true
+    enabled: false
 
   rabbitmq:
     host: 127.0.0.1
@@ -56,3 +56,7 @@ aliyun:
     endpoint: https://oss-cn-beijing.aliyuncs.com
     region: cn-beijing
     bucket-name: my-awesome-novel
+
+logging:
+  level:
+    org.springframework.ai: DEBUG

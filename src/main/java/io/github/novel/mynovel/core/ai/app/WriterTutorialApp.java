@@ -4,7 +4,7 @@ import io.github.novel.mynovel.core.ai.advisors.MyLoggerAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -21,14 +21,15 @@ public class WriterTutorialApp {
 
     private final ChatMemory chatMemory;
 
-    public WriterTutorialApp(ChatModel dashScopeChatModel) {
+    public WriterTutorialApp(ChatModel dashScopeChatModel, ChatMemoryRepository redisChatMemoryRepository) {
         chatMemory = MessageWindowChatMemory.builder()
-                .maxMessages(5)
-                .chatMemoryRepository(new InMemoryChatMemoryRepository())
+                .maxMessages(20)
+                .chatMemoryRepository(redisChatMemoryRepository)
                 .build();
 
         chatclient = ChatClient.builder(dashScopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
+                // 自定义日志 Advisor，可按需开启
                 .defaultAdvisors(new MyLoggerAdvisor())
                 .build();
     }

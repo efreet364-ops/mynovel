@@ -48,11 +48,11 @@ public class MyLoggerAdvisor implements CallAdvisor, StreamAdvisor {
     }
 
     private void logRequest(ChatClientRequest request) {
-        logger.debug("request: {}", request);
+        logger.debug("request: {}", request.prompt().getUserMessage().getText());
     }
 
     private void logResponse(ChatClientResponse chatClientResponse) {
-        logger.debug("response: {}", chatClientResponse);
+        logger.debug("response: {}", chatClientResponse.chatResponse().getResult().getOutput().getText());
     }
 
 }
