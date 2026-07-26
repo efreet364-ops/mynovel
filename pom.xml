@@ -203,6 +203,13 @@
             <version>2.0.61</version>
         </dependency>
 
+        <!-- markdown文档加载器 -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-markdown-document-reader</artifactId>
+        </dependency>
+
+
     </dependencies>
 
 
