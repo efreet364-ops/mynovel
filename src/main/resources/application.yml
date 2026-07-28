@@ -45,6 +45,10 @@ spring:
     enabled: true
     uris: http://localhost:9200
 
+# searchApi
+search-api:
+  api-key: ${SEARCH_API_KEY}
+
 
 jwt:
   secret: E66559580A1ADF48CDD928516062F12E
