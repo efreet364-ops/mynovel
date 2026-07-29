@@ -2,6 +2,7 @@ package io.github.novel.mynovel.core.ai.app;
 
 import io.github.novel.mynovel.core.ai.advisors.MyLoggerAdvisor;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
@@ -12,7 +13,9 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
+@Slf4j
 @Component
 public class WriterTutorialApp {
 
@@ -51,6 +54,20 @@ public class WriterTutorialApp {
                 .chatResponse();
 
         return chatResponse.getResult().getOutput().getText();
+    }
+
+    /**
+     * AI 基础对话 支持多轮对话记忆，SSE流式传输
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public Flux<String> doChatByStream(String message, String chatId) {
+        return chatclient.prompt()
+                .user(message)
+                .advisors(MessageChatMemoryAdvisor.builder(chatMemory).conversationId(chatId).build())
+                .stream()
+                .content();
     }
 
     public String doChatWithRag(String message, String chatId) {
