@@ -48,3 +48,6 @@ build/
 *.swp
 *.swo
 *~
+
+# Local secrets
+src/main/resources/application-dev.yml

@@ -73,6 +73,26 @@ public enum ErrorCodeEnum {
     USER_COMMENTED("A2001", "用户已发表评论"),
 
     /**
+     * 支付金额错误
+     */
+    PAY_AMOUNT_ERROR("A2100", "支付金额错误"),
+
+    /**
+     * 支付订单不存在
+     */
+    PAY_ORDER_NOT_FOUND("A2101", "支付订单不存在"),
+
+    /**
+     * 支付配置错误
+     */
+    PAY_CONFIG_ERROR("B2100", "支付配置错误"),
+
+    /**
+     * Stripe 支付异常
+     */
+    STRIPE_PAY_ERROR("C2100", "Stripe支付异常"),
+
+    /**
      * 用户密码错误
      */
     USER_PASSWORD_ERROR("A0210", "用户密码错误"),
@@ -153,4 +173,3 @@ public enum ErrorCodeEnum {
     private String message;
 
 }
-

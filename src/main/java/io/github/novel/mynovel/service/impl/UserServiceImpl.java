@@ -203,6 +203,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                 .nickName(userInfo.getNickName())
                 .userSex(userInfo.getUserSex())
                 .userPhoto(userInfo.getUserPhoto())
+                .accountBalance(userInfo.getAccountBalance() == null ? 0L : userInfo.getAccountBalance())
                 .build());
     }
 

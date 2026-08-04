@@ -29,5 +29,10 @@ public class UserInfoRespDto {
      * */
     @Schema(description = "用户性别")
     private Integer userSex;
-}
 
+    /**
+     * 账户余额
+     */
+    @Schema(description = "账户余额，单位：屋币")
+    private Long accountBalance;
+}

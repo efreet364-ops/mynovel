@@ -1,0 +1,21 @@
+CREATE TABLE `pay_stripe` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id` bigint NOT NULL COMMENT '充值用户ID',
+  `out_trade_no` varchar(64) NOT NULL COMMENT '商户订单号',
+  `checkout_session_id` varchar(128) DEFAULT NULL COMMENT 'Stripe Checkout Session ID',
+  `payment_intent_id` varchar(128) DEFAULT NULL COMMENT 'Stripe PaymentIntent ID',
+  `checkout_url` varchar(1024) DEFAULT NULL COMMENT 'Stripe Checkout URL',
+  `status` varchar(16) NOT NULL COMMENT '交易状态：CREATED-已创建 PAID-已支付 FAILED-支付失败',
+  `amount_cny` int NOT NULL COMMENT '人民币充值金额，单位：元',
+  `amount_aud_cent` int NOT NULL COMMENT 'Stripe 收款金额，单位：澳元分',
+  `coin_value` int NOT NULL COMMENT '到账屋币数量',
+  `stripe_event_id` varchar(128) DEFAULT NULL COMMENT '最后处理的 Stripe Event ID',
+  `paid_time` datetime DEFAULT NULL COMMENT '支付完成时间',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `update_time` datetime NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_pay_stripe_out_trade_no` (`out_trade_no`),
+  UNIQUE KEY `uk_pay_stripe_checkout_session_id` (`checkout_session_id`),
+  KEY `idx_pay_stripe_user_id` (`user_id`),
+  KEY `idx_pay_stripe_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Stripe 支付流水';

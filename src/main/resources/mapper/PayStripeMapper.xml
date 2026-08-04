@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.novel.mynovel.dao.mapper.PayStripeMapper">
+
+    <!-- 回写 Stripe Session 信息。限制 CREATED 状态，避免覆盖已经支付或失败的订单。 -->
+    <update id="markCheckoutCreated">
+        UPDATE pay_stripe
+        SET checkout_session_id = #{checkoutSessionId},
+            checkout_url = #{checkoutUrl},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+          AND status = 'CREATED'
+    </update>
+
+    <!-- webhook 幂等核心：只有非 PAID 订单能转为 PAID，调用方只有在影响行数为 1 时才执行入账。 -->
+    <update id="markPaid">
+        UPDATE pay_stripe
+        SET status = 'PAID',
+            checkout_session_id = COALESCE(checkout_session_id, #{checkoutSessionId}),
+            payment_intent_id = #{paymentIntentId},
+            stripe_event_id = #{stripeEventId},
+            paid_time = #{paidTime},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+          AND status != 'PAID'
+    </update>
+
+    <!-- 异步支付失败不能覆盖已支付订单，防止 Stripe 事件乱序破坏已到账状态。 -->
+    <update id="markFailedByCheckoutSessionId">
+        UPDATE pay_stripe
+        SET status = 'FAILED',
+            stripe_event_id = #{stripeEventId},
+            update_time = #{updateTime}
+        WHERE checkout_session_id = #{checkoutSessionId}
+          AND status != 'PAID'
+    </update>
+</mapper>

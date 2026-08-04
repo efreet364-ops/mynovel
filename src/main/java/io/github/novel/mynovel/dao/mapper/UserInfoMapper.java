@@ -2,6 +2,7 @@ package io.github.novel.mynovel.dao.mapper;
 
 import io.github.novel.mynovel.dao.entity.UserInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface UserInfoMapper extends BaseMapper<UserInfo> {
 
+    int increaseAccountBalance(@Param("userId") Long userId, @Param("amount") Long amount);
 }

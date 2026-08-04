@@ -49,6 +49,16 @@ spring:
 search-api:
   api-key: ${SEARCH_API_KEY}
 
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  currency: aud
+  cny-to-aud-rate: 0.21
+  min-amount-cny: 1
+  max-amount-cny: 500
+  success-url: ${STRIPE_SUCCESS_URL:http://localhost:8080/#/user/recharge/result}
+  cancel-url: ${STRIPE_CANCEL_URL:http://localhost:8080/#/user/recharge/result}
+
 
 jwt:
   secret: E66559580A1ADF48CDD928516062F12E
