@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-//@ConditionalOnProperty(prefix = "spring.elasticsearch", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "spring.elasticsearch", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class BookToEsTask {
