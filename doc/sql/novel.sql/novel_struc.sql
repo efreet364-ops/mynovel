@@ -550,6 +550,7 @@ CREATE TABLE `user_info` (
   `user_photo` varchar(100) DEFAULT NULL COMMENT '用户头像',
   `user_sex` tinyint(3) unsigned DEFAULT NULL COMMENT '用户性别;0-男 1-女',
   `account_balance` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '账户余额',
+  `vip_expire_time` datetime DEFAULT NULL COMMENT 'VIP到期时间',
   `status` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '用户状态;0-正常',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
@@ -594,5 +595,27 @@ CREATE TABLE `user_read_history` (
   UNIQUE KEY `uk_userId_bookId` (`user_id`,`book_id`),
   UNIQUE KEY `pk_id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户阅读历史';
+
+-- ----------------------------
+-- Table structure for vip_product
+-- ----------------------------
+DROP TABLE IF EXISTS `vip_product`;
+CREATE TABLE `vip_product` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(50) NOT NULL COMMENT 'VIP套餐名',
+  `duration_days` int(10) unsigned NOT NULL COMMENT '有效天数',
+  `price_cent` int(10) unsigned NOT NULL COMMENT '价格，单位分',
+  `status` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '状态;0-启用 1-停用',
+  `sort` int(10) unsigned NOT NULL DEFAULT '10' COMMENT '排序',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='VIP套餐';
+
+INSERT INTO `vip_product` (`id`, `name`, `duration_days`, `price_cent`, `status`, `sort`, `create_time`, `update_time`)
+VALUES
+  (1, '月卡VIP', 30, 1200, 0, 1, NOW(), NOW()),
+  (2, '季卡VIP', 90, 3000, 0, 2, NOW(), NOW()),
+  (3, '年卡VIP', 365, 9900, 0, 3, NOW(), NOW());
 
 SET FOREIGN_KEY_CHECKS = 1;

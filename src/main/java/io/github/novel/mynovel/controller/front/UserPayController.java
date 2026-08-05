@@ -4,6 +4,7 @@ import io.github.novel.mynovel.core.auth.UserHolder;
 import io.github.novel.mynovel.core.common.resp.RestResp;
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.dto.req.StripeCheckoutSessionReqDto;
+import io.github.novel.mynovel.dto.req.StripeVipCheckoutSessionReqDto;
 import io.github.novel.mynovel.dto.resp.StripeCheckoutSessionRespDto;
 import io.github.novel.mynovel.dto.resp.StripePayStatusRespDto;
 import io.github.novel.mynovel.service.PayService;
@@ -29,6 +30,13 @@ public class UserPayController {
     public RestResp<StripeCheckoutSessionRespDto> createStripeCheckoutSession(
             @Valid @RequestBody StripeCheckoutSessionReqDto dto) {
         return payService.createStripeCheckoutSession(UserHolder.getUserId(), dto);
+    }
+
+    @Operation(summary = "创建 Stripe VIP Checkout Session")
+    @PostMapping("stripe/vip/checkout-session")
+    public RestResp<StripeCheckoutSessionRespDto> createStripeVipCheckoutSession(
+            @Valid @RequestBody StripeVipCheckoutSessionReqDto dto) {
+        return payService.createStripeVipCheckoutSession(UserHolder.getUserId(), dto);
     }
 
     /**

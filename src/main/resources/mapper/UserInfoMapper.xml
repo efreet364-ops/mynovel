@@ -8,4 +8,16 @@
             update_time = NOW()
         WHERE id = #{userId}
     </update>
+
+    <update id="renewVip">
+        UPDATE user_info
+        SET vip_expire_time =
+            CASE
+                WHEN vip_expire_time IS NOT NULL AND vip_expire_time > NOW()
+                    THEN DATE_ADD(vip_expire_time, INTERVAL #{days} DAY)
+                ELSE DATE_ADD(NOW(), INTERVAL #{days} DAY)
+            END,
+            update_time = NOW()
+        WHERE id = #{userId}
+    </update>
 </mapper>

@@ -51,6 +51,26 @@ public class PayStripe implements Serializable {
      */
     private Integer coinValue;
 
+    /**
+     * 商品类型;0-屋币 1-VIP
+     */
+    private Integer productType;
+
+    /**
+     * 商品ID
+     */
+    private Long productId;
+
+    /**
+     * 商品名
+     */
+    private String productName;
+
+    /**
+     * 商品值;屋币数量或VIP天数
+     */
+    private Integer productValue;
+
     private String stripeEventId;
 
     private LocalDateTime paidTime;

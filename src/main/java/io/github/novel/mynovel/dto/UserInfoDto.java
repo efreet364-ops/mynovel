@@ -1,9 +1,12 @@
 package io.github.novel.mynovel.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 用户信息 DTO
@@ -21,5 +24,7 @@ public class UserInfoDto implements Serializable {
     private Long id;
 
     private Integer status;
+
+    private LocalDateTime vipExpireTime;
 
 }

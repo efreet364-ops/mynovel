@@ -62,6 +62,11 @@ public class UserInfo implements Serializable {
     private Long accountBalance;
 
     /**
+     * VIP到期时间
+     */
+    private LocalDateTime vipExpireTime;
+
+    /**
      * 用户状态;0-正常
      */
     private Integer status;

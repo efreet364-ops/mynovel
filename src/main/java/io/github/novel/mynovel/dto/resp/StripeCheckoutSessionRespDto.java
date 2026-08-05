@@ -21,6 +21,15 @@ public class StripeCheckoutSessionRespDto {
     @Schema(description = "到账屋币数量")
     private Integer coinValue;
 
+    @Schema(description = "商品类型;0-屋币 1-VIP")
+    private Integer productType;
+
+    @Schema(description = "商品名")
+    private String productName;
+
+    @Schema(description = "商品值;屋币数量或VIP天数")
+    private Integer productValue;
+
     @Schema(description = "Stripe 实收币种")
     private String currency;
 

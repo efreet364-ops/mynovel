@@ -15,4 +15,6 @@ import org.apache.ibatis.annotations.Param;
 public interface UserInfoMapper extends BaseMapper<UserInfo> {
 
     int increaseAccountBalance(@Param("userId") Long userId, @Param("amount") Long amount);
+
+    int renewVip(@Param("userId") Long userId, @Param("days") Integer days);
 }

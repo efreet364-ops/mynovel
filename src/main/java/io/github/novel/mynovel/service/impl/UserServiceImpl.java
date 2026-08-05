@@ -204,6 +204,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                 .userSex(userInfo.getUserSex())
                 .userPhoto(userInfo.getUserPhoto())
                 .accountBalance(userInfo.getAccountBalance() == null ? 0L : userInfo.getAccountBalance())
+                .vip(userInfo.getVipExpireTime() != null && userInfo.getVipExpireTime().isAfter(LocalDateTime.now()))
+                .vipExpireTime(userInfo.getVipExpireTime())
                 .build());
     }
 

@@ -1,6 +1,7 @@
 package io.github.novel.mynovel.dto.resp;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 
@@ -35,4 +36,10 @@ public class UserInfoRespDto {
      */
     @Schema(description = "账户余额，单位：屋币")
     private Long accountBalance;
+
+    @Schema(description = "是否是有效VIP")
+    private Boolean vip;
+
+    @Schema(description = "VIP到期时间")
+    private LocalDateTime vipExpireTime;
 }

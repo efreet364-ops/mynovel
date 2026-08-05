@@ -28,6 +28,7 @@ import io.github.novel.mynovel.dto.req.ChapterAddReqDto;
 import io.github.novel.mynovel.dto.req.ChapterUpdateReqDto;
 import io.github.novel.mynovel.dto.req.UserCommentReqDto;
 import io.github.novel.mynovel.dto.resp.*;
+import io.github.novel.mynovel.manager.UserVipManager;
 import io.github.novel.mynovel.manager.cache.*;
 import io.github.novel.mynovel.manager.dao.UserDaoManager;
 import io.github.novel.mynovel.manager.mq.AmqpMsgManager;
@@ -75,6 +76,8 @@ public class BookServiceImpl implements BookService {
 
     private final AuthorInfoCacheManager authorInfoCacheManager;
 
+    private final UserVipManager userVipManager;
+
     private final Integer REC_BOOK_COUNT = 4;
 
     @Override
@@ -104,6 +107,9 @@ public class BookServiceImpl implements BookService {
     public RestResp<BookContentAboutRespDto> getBookContentAbout(Long chapterId) {
         // 查询章节信息
         BookChapterRespDto chapter = bookChapterCacheManager.getChapter(chapterId);
+        if (Objects.equals(chapter.getIsVip(), 1)) {
+            userVipManager.requireVip(UserHolder.getUserId());
+        }
         // 查询小说信息
         BookInfoRespDto bookInfo = bookInfoCacheManager.getBookInfo(chapter.getBookId());
         // 查询章节内容

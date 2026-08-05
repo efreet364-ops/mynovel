@@ -2,6 +2,7 @@ package io.github.novel.mynovel.core.config;
 
 import io.github.novel.mynovel.core.constant.ApiRouterConsts;
 import io.github.novel.mynovel.core.interceptor.AuthInterceptor;
+import io.github.novel.mynovel.core.interceptor.TokenParseInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -13,8 +14,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
 
+    private final TokenParseInterceptor tokenParseInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(tokenParseInterceptor)
+                .addPathPatterns(ApiRouterConsts.API_FRONT_BOOK_URL_PREFIX + "/**");
+
         registry.addInterceptor(authInterceptor)
                 // 拦截会员中心相关请求接口
                 .addPathPatterns(ApiRouterConsts.API_FRONT_USER_URL_PREFIX + "/**",

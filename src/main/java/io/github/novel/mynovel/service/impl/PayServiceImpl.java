@@ -17,14 +17,17 @@ import io.github.novel.mynovel.core.constant.DatabaseConsts;
 import io.github.novel.mynovel.core.util.PayAmountUtils;
 import io.github.novel.mynovel.dao.entity.PayStripe;
 import io.github.novel.mynovel.dao.entity.UserPayLog;
+import io.github.novel.mynovel.dao.entity.VipProduct;
 import io.github.novel.mynovel.dao.mapper.PayStripeMapper;
 import io.github.novel.mynovel.dao.mapper.UserInfoMapper;
 import io.github.novel.mynovel.dao.mapper.UserPayLogMapper;
+import io.github.novel.mynovel.dao.mapper.VipProductMapper;
 import io.github.novel.mynovel.dto.req.StripeCheckoutSessionReqDto;
+import io.github.novel.mynovel.dto.req.StripeVipCheckoutSessionReqDto;
 import io.github.novel.mynovel.dto.resp.StripeCheckoutSessionRespDto;
 import io.github.novel.mynovel.dto.resp.StripePayStatusRespDto;
+import io.github.novel.mynovel.manager.UserVipManager;
 import io.github.novel.mynovel.service.PayService;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -46,6 +49,8 @@ public class PayServiceImpl implements PayService {
     private static final String STATUS_FAILED = "FAILED";
     private static final byte PAY_CHANNEL_STRIPE = 2;
     private static final byte PRODUCT_TYPE_COIN = 0;
+    private static final byte PRODUCT_TYPE_VIP = 1;
+    private static final int VIP_PRODUCT_STATUS_ENABLED = 0;
     private static final DateTimeFormatter ORDER_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -53,6 +58,8 @@ public class PayServiceImpl implements PayService {
     private final PayStripeMapper payStripeMapper;
     private final UserInfoMapper userInfoMapper;
     private final UserPayLogMapper userPayLogMapper;
+    private final VipProductMapper vipProductMapper;
+    private final UserVipManager userVipManager;
     private final ObjectMapper objectMapper;
 
     /**
@@ -94,6 +101,10 @@ public class PayServiceImpl implements PayService {
         payStripe.setAmountCny(dto.getAmountCny());
         payStripe.setAmountAudCent(amountAudCent);
         payStripe.setCoinValue(coinValue);
+        payStripe.setProductType((int) PRODUCT_TYPE_COIN);
+        payStripe.setProductId(0L);
+        payStripe.setProductName("屋币");
+        payStripe.setProductValue(coinValue);
         payStripe.setCreateTime(now);
         payStripe.setUpdateTime(now);
         payStripeMapper.insert(payStripe);
@@ -101,7 +112,9 @@ public class PayServiceImpl implements PayService {
         try {
             Stripe.apiKey = stripeProperties.getSecretKey();
             Session session = Session.create(buildSessionCreateParams(
-                    userId, outTradeNo, dto.getAmountCny(), amountAudCent, coinValue));
+                    userId, outTradeNo, dto.getAmountCny(), amountAudCent,
+                    "屋币充值", dto.getAmountCny() + " CNY = " + coinValue + " 屋币",
+                    PRODUCT_TYPE_COIN, 0L, "屋币", coinValue));
 
             // Stripe Session 创建成功后再回写 sessionId 和 checkoutUrl。
             // 本地状态仍保持 CREATED，等待 webhook 确认支付结果。
@@ -112,12 +125,76 @@ public class PayServiceImpl implements PayService {
                     .checkoutUrl(session.getUrl())
                     .amountCny(dto.getAmountCny())
                     .coinValue(coinValue)
+                    .productType((int) PRODUCT_TYPE_COIN)
+                    .productName("屋币")
+                    .productValue(coinValue)
                     .currency(stripeProperties.getCurrency())
                     .amountAud(PayAmountUtils.convertAudCentToAud(amountAudCent))
                     .build());
         } catch (StripeException exception) {
             log.warn("Create Stripe Checkout Session failed, outTradeNo={}", outTradeNo, exception);
             // 本地订单已经创建，但 Stripe 未能创建支付页，标记 FAILED 便于后续排查。
+            payStripe.setStatus(STATUS_FAILED);
+            payStripe.setUpdateTime(LocalDateTime.now());
+            payStripeMapper.updateById(payStripe);
+            throw new BusinessException(ErrorCodeEnum.STRIPE_PAY_ERROR);
+        }
+    }
+
+    @Transactional
+    @Override
+    public RestResp<StripeCheckoutSessionRespDto> createStripeVipCheckoutSession(
+            Long userId, StripeVipCheckoutSessionReqDto dto) {
+        requireStripeSecretKey();
+
+        VipProduct product = vipProductMapper.selectById(dto.getProductId());
+        if (product == null || !Objects.equals(product.getStatus(), VIP_PRODUCT_STATUS_ENABLED)) {
+            throw new BusinessException(ErrorCodeEnum.USER_REQUEST_PARAM_ERROR);
+        }
+
+        Integer amountCny = product.getPriceCent() / 100;
+        Integer amountAudCent = PayAmountUtils.convertCnyToAudCent(
+                amountCny, stripeProperties.getCnyToAudRate());
+        String outTradeNo = generateOutTradeNo();
+        LocalDateTime now = LocalDateTime.now();
+
+        PayStripe payStripe = new PayStripe();
+        payStripe.setUserId(userId);
+        payStripe.setOutTradeNo(outTradeNo);
+        payStripe.setStatus(STATUS_CREATED);
+        payStripe.setAmountCny(amountCny);
+        payStripe.setAmountAudCent(amountAudCent);
+        payStripe.setCoinValue(0);
+        payStripe.setProductType((int) PRODUCT_TYPE_VIP);
+        payStripe.setProductId(product.getId());
+        payStripe.setProductName(product.getName());
+        payStripe.setProductValue(product.getDurationDays());
+        payStripe.setCreateTime(now);
+        payStripe.setUpdateTime(now);
+        payStripeMapper.insert(payStripe);
+
+        try {
+            Stripe.apiKey = stripeProperties.getSecretKey();
+            Session session = Session.create(buildSessionCreateParams(
+                    userId, outTradeNo, amountCny, amountAudCent,
+                    product.getName(), product.getName() + "，有效期 " + product.getDurationDays() + " 天",
+                    PRODUCT_TYPE_VIP, product.getId(), product.getName(), product.getDurationDays()));
+
+            payStripeMapper.markCheckoutCreated(payStripe.getId(), session.getId(), session.getUrl(),
+                    LocalDateTime.now());
+            return RestResp.ok(StripeCheckoutSessionRespDto.builder()
+                    .outTradeNo(outTradeNo)
+                    .checkoutUrl(session.getUrl())
+                    .amountCny(amountCny)
+                    .coinValue(0)
+                    .productType((int) PRODUCT_TYPE_VIP)
+                    .productName(product.getName())
+                    .productValue(product.getDurationDays())
+                    .currency(stripeProperties.getCurrency())
+                    .amountAud(PayAmountUtils.convertAudCentToAud(amountAudCent))
+                    .build());
+        } catch (StripeException exception) {
+            log.warn("Create Stripe VIP Checkout Session failed, outTradeNo={}", outTradeNo, exception);
             payStripe.setStatus(STATUS_FAILED);
             payStripe.setUpdateTime(LocalDateTime.now());
             payStripeMapper.updateById(payStripe);
@@ -147,6 +224,12 @@ public class PayServiceImpl implements PayService {
                 .status(payStripe.getStatus())
                 .amountCny(payStripe.getAmountCny())
                 .coinValue(payStripe.getCoinValue())
+                .productType(payStripe.getProductType())
+                .productName(payStripe.getProductName())
+                .productValue(payStripe.getProductValue())
+                .vipExpireTime(Objects.equals(payStripe.getProductType(), (int) PRODUCT_TYPE_VIP)
+                        && Objects.equals(payStripe.getStatus(), STATUS_PAID)
+                        ? userVipManager.getVipExpireTime(payStripe.getUserId()) : null)
                 .amountAud(PayAmountUtils.convertAudCentToAud(payStripe.getAmountAudCent()))
                 .paidTime(payStripe.getPaidTime())
                 .build());
@@ -206,7 +289,9 @@ public class PayServiceImpl implements PayService {
      * clientReferenceId 和 metadata 用于排查、审计和在 Stripe 控制台反查本地订单。
      */
     private SessionCreateParams buildSessionCreateParams(Long userId, String outTradeNo, Integer amountCny,
-                                                         Integer amountAudCent, Integer coinValue) {
+                                                         Integer amountAudCent, String stripeProductName,
+                                                         String stripeProductDescription, Byte productType,
+                                                         Long productId, String productName, Integer productValue) {
         return SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(appendQuery(stripeProperties.getSuccessUrl(),
@@ -219,7 +304,9 @@ public class PayServiceImpl implements PayService {
                         "userId", String.valueOf(userId),
                         "outTradeNo", outTradeNo,
                         "amountCny", String.valueOf(amountCny),
-                        "coinValue", String.valueOf(coinValue)
+                        "productType", String.valueOf(productType),
+                        "productId", String.valueOf(productId),
+                        "productValue", String.valueOf(productValue)
                 ))
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
@@ -228,8 +315,8 @@ public class PayServiceImpl implements PayService {
                                 // Stripe 要求 unitAmount 使用最小货币单位；这里传入的是 AUD cent。
                                 .setUnitAmount(Long.valueOf(amountAudCent))
                                 .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                        .setName("屋币充值")
-                                        .setDescription(amountCny + " CNY = " + coinValue + " 屋币")
+                                        .setName(stripeProductName)
+                                        .setDescription(stripeProductDescription)
                                         .build())
                                 .build())
                         .build())
@@ -273,7 +360,14 @@ public class PayServiceImpl implements PayService {
             return;
         }
 
-        // 充值记录使用现有 user_pay_log 体系；payChannel=2 代表 Stripe。
+        if (Objects.equals(payStripe.getProductType(), (int) PRODUCT_TYPE_VIP)) {
+            fulfillVip(payStripe, now);
+            return;
+        }
+        fulfillCoin(payStripe, now);
+    }
+
+    private void fulfillCoin(PayStripe payStripe, LocalDateTime now) {
         UserPayLog userPayLog = new UserPayLog();
         userPayLog.setUserId(payStripe.getUserId());
         userPayLog.setPayChannel(PAY_CHANNEL_STRIPE);
@@ -290,6 +384,24 @@ public class PayServiceImpl implements PayService {
 
         // 余额必须使用数据库原子递增，避免并发支付完成时出现读改写覆盖。
         userInfoMapper.increaseAccountBalance(payStripe.getUserId(), payStripe.getCoinValue().longValue());
+    }
+
+    private void fulfillVip(PayStripe payStripe, LocalDateTime now) {
+        UserPayLog userPayLog = new UserPayLog();
+        userPayLog.setUserId(payStripe.getUserId());
+        userPayLog.setPayChannel(PAY_CHANNEL_STRIPE);
+        userPayLog.setOutTradeNo(payStripe.getOutTradeNo());
+        userPayLog.setAmount(payStripe.getAmountCny() * 100);
+        userPayLog.setProductType(PRODUCT_TYPE_VIP);
+        userPayLog.setProductId(payStripe.getProductId());
+        userPayLog.setProductName(payStripe.getProductName());
+        userPayLog.setProductValue(payStripe.getProductValue());
+        userPayLog.setPayTime(now);
+        userPayLog.setCreateTime(now);
+        userPayLog.setUpdateTime(now);
+        userPayLogMapper.insert(userPayLog);
+
+        userVipManager.openOrRenewVip(payStripe.getUserId(), payStripe.getProductValue());
     }
 
     /**

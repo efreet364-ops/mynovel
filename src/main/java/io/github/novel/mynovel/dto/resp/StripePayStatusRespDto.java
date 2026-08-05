@@ -22,6 +22,18 @@ public class StripePayStatusRespDto {
     @Schema(description = "到账屋币数量")
     private Integer coinValue;
 
+    @Schema(description = "商品类型;0-屋币 1-VIP")
+    private Integer productType;
+
+    @Schema(description = "商品名")
+    private String productName;
+
+    @Schema(description = "商品值;屋币数量或VIP天数")
+    private Integer productValue;
+
+    @Schema(description = "VIP到期时间")
+    private LocalDateTime vipExpireTime;
+
     @Schema(description = "Stripe 收款金额，单位：澳元")
     private BigDecimal amountAud;
 
