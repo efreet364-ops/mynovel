@@ -75,7 +75,7 @@ public abstract class BaseAgent {
                 log.info("executing step " + stepNumber + "/" + maxSteps);
                 // 单步执行
                 String stepResult = step();
-                String result = "Step " + stepNumber + ": " + stepResult;
+                String result = formatStepResult(stepNumber, stepResult);
                 results.add(result);
             }
 
@@ -104,10 +104,18 @@ public abstract class BaseAgent {
         CompletableFuture.runAsync(() -> {
             try {
                 if (this.state != AgentState.IDLE) {
-                    emitter.send("Can not run agent from state: " + this.state);
+                    emitter.send(SseEmitter.event()
+                            .name("message")
+                            .data("Can not run agent from state: " + this.state));
+                    emitter.complete();
+                    return;
                 }
                 if (StrUtil.isBlank(userPrompt)) {
-                    emitter.send("Can not run agent with empty user prompt");
+                    emitter.send(SseEmitter.event()
+                            .name("message")
+                            .data("Can not run agent with empty user prompt"));
+                    emitter.complete();
+                    return;
                 }
 
                 log.info("userPrompt: " + userPrompt);
@@ -128,16 +136,18 @@ public abstract class BaseAgent {
                         log.info("executing step " + stepNumber + "/" + maxSteps);
                         // 单步执行
                         String stepResult = step();
-                        String result = "Step " + stepNumber + ": " + stepResult;
+                        String result = formatStepResult(stepNumber, stepResult);
                         results.add(result);
 
                         // 发送每一步的结果
-                        emitter.send(result);
+                        emitter.send(SseEmitter.event().name("message").data(result));
                     }
 
                     if (state != AgentState.FINISHED && currentStep >= maxSteps) {
                         state = AgentState.FINISHED;
-                        emitter.send("Terminated: Reached max steps (" + maxSteps + ")");
+                        emitter.send(SseEmitter.event()
+                                .name("message")
+                                .data("Terminated: Reached max steps (" + maxSteps + ")"));
                     }
                     // 正常完成
                     emitter.complete();
@@ -145,7 +155,9 @@ public abstract class BaseAgent {
                     state = AgentState.ERROR;
                     log.error("Error executing agent", e);
                     try {
-                        emitter.send("执行错误" + e.getMessage());
+                        emitter.send(SseEmitter.event()
+                                .name("message")
+                                .data("执行错误" + e.getMessage()));
                         emitter.complete();
                     } catch (IOException ex) {
                         emitter.completeWithError(ex);
@@ -173,6 +185,13 @@ public abstract class BaseAgent {
         });
 
         return emitter;
+    }
+
+    private String formatStepResult(int stepNumber, String stepResult) {
+        if (stepResult != null && stepResult.stripLeading().startsWith("###")) {
+            return stepResult;
+        }
+        return "### Step " + stepNumber + "\n\n" + stepResult;
     }
 
 }
