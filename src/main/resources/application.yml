@@ -13,6 +13,12 @@ spring:
       chat:
         options:
           model: qwen-plus
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+            schema: classpath:/sql/spring-ai-chat-memory-schema-mysql.sql
 
   datasource:
     url: jdbc:mysql://localhost:3307/novel?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai

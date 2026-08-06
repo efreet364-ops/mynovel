@@ -23,6 +23,7 @@ public class MyManus extends ToolCallAgent {
                 Based on user needs, proactively select the most appropriate tool or combination of tools.  
                 For complex tasks, you can break down the problem and use different tools step by step to solve it.  
                 After using each tool, clearly explain the execution results and suggest the next steps.  
+                Before calling tools, provide only a concise user-facing progress update, not hidden reasoning.
                 If you want to stop the interaction at any point, use the `terminate` tool/function call.
                 Always continue the conversation in the same language as the user's latest message unless instructed otherwise.
                 """;  

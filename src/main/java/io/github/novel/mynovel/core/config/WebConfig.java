@@ -24,6 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor)
                 // 拦截会员中心相关请求接口
                 .addPathPatterns(ApiRouterConsts.API_FRONT_USER_URL_PREFIX + "/**",
+                        ApiRouterConsts.API_FRONT_AI_URL_PREFIX + "/**",
                         // 拦截作家后台相关请求接口
                         ApiRouterConsts.API_AUTHOR_URL_PREFIX + "/**",
                         // 拦截平台后台相关请求接口
