@@ -12,10 +12,14 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
 import io.github.novel.mynovel.core.ai.constant.FileConstant;
+import io.github.novel.mynovel.core.auth.UserHolder;
+import io.github.novel.mynovel.core.util.AliyunOSSOperator;
+import io.github.novel.mynovel.core.util.OssKeyUtils;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,33 +31,57 @@ public class PDFGenerationTool {
 
     private static final Pattern MARKDOWN_IMAGE_PATTERN = Pattern.compile("!\\[([^]]*)]\\(([^)\\s]+)(?:\\s+\"[^\"]*\")?\\)");
 
+    private final AliyunOSSOperator aliyunOSSOperator;
+
+    private final String fileSaveDir;
+
+    public PDFGenerationTool(AliyunOSSOperator aliyunOSSOperator) {
+        this(aliyunOSSOperator, FileConstant.DEFAULT_FILE_SAVE_DIR);
+    }
+
+    public PDFGenerationTool(AliyunOSSOperator aliyunOSSOperator, String fileSaveDir) {
+        this.aliyunOSSOperator = aliyunOSSOperator;
+        this.fileSaveDir = fileSaveDir;
+    }
+
     @Tool(description = "Generate a PDF file with given content. Supports plain text and common Markdown syntax, including images.")
     public String generatePDF(
             @ToolParam(description = "Name of the file to save the generated PDF") String fileName,
             @ToolParam(description = "Content to be included in the PDF. Markdown image syntax like ![alt](path-or-url) will be rendered as images.") String content) {
-        String fileDir = FileConstant.FILE_SAVE_DIR + "/pdf";
-        String normalizedFileName = fileName.endsWith(".pdf") ? fileName : fileName + ".pdf";
-        String filePath = fileDir + "/" + normalizedFileName;
+        String fileDir = fileSaveDir + "/pdf";
+        String normalizedFileName = OssKeyUtils.sanitizePdfFileName(fileName);
+        Path pdfPath = Paths.get(fileDir, normalizedFileName);
         try {
             // 创建目录
             FileUtil.mkdir(fileDir);
             // 创建 PdfWriter 和 PdfDocument 对象
-            try (PdfWriter writer = new PdfWriter(filePath);
+            try (PdfWriter writer = new PdfWriter(pdfPath.toString());
                  PdfDocument pdf = new PdfDocument(writer);
                  Document document = new Document(pdf)) {
-                // 自定义字体（需要人工下载字体文件到特定目录）
-                String fontPath = Paths.get("src/main/resources/static/fonts/微软雅黑.ttf")
-                        .toAbsolutePath().toString();
-                PdfFont font = PdfFontFactory.createFont(fontPath,
-                        PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
-                // 使用内置中文字体
-//                PdfFont font = PdfFontFactory.createFont("STSongStd-Light", "UniGB-UCS2-H");
+                PdfFont font = loadFont();
                 document.setFont(font);
                 addMarkdownContent(document, content);
             }
-            return "PDF generated successfully to: " + filePath;
+            String objectKey = OssKeyUtils.genAgentPdfKey(
+                    aliyunOSSOperator.getAgentPrefix(),
+                    UserHolder.getUserId(),
+                    normalizedFileName);
+            aliyunOSSOperator.uploadAgentPdf(pdfPath, objectKey, normalizedFileName);
+            String downloadUrl = aliyunOSSOperator.generateAgentPdfDownloadUrl(objectKey, normalizedFileName);
+            deleteLocalPdf(pdfPath);
+            return """
+                    PDF 已生成：[点击下载 %s](%s)
+
+                    链接 %d 天内有效。
+                    """.formatted(
+                    escapeMarkdownLinkText(normalizedFileName),
+                    downloadUrl,
+                    aliyunOSSOperator.getAgentUrlExpireDays()
+            );
         } catch (IOException e) {
             return "Error generating PDF: " + e.getMessage();
+        } catch (Exception e) {
+            return "PDF 已生成，但上传到 OSS 或生成下载链接失败：" + e.getMessage();
         }
     }
 
@@ -138,16 +166,40 @@ public class PDFGenerationTool {
             return path.toAbsolutePath().toString();
         }
 
-        Path projectRootPath = Paths.get(FileConstant.FILE_SAVE_DIR).getParent().resolve(imageLocation);
+        Path projectRootPath = Paths.get(fileSaveDir).getParent().resolve(imageLocation);
         if (Files.exists(projectRootPath)) {
             return projectRootPath.toAbsolutePath().toString();
         }
 
-        Path downloadPath = Paths.get(FileConstant.FILE_SAVE_DIR, "download", imageLocation);
+        Path downloadPath = Paths.get(fileSaveDir, "download", imageLocation);
         if (Files.exists(downloadPath)) {
             return downloadPath.toAbsolutePath().toString();
         }
 
         return path.toAbsolutePath().toString();
+    }
+
+    private PdfFont loadFont() throws IOException {
+        String fontResourcePath = "static/fonts/微软雅黑.ttf";
+        try (InputStream inputStream = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(fontResourcePath)) {
+            if (inputStream == null) {
+                return PdfFontFactory.createFont("STSongStd-Light", "UniGB-UCS2-H");
+            }
+            byte[] fontBytes = inputStream.readAllBytes();
+            return PdfFontFactory.createFont(fontBytes, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
+        }
+    }
+
+    private void deleteLocalPdf(Path pdfPath) {
+        try {
+            Files.deleteIfExists(pdfPath);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private String escapeMarkdownLinkText(String text) {
+        return text.replace("[", "\\[").replace("]", "\\]");
     }
 }

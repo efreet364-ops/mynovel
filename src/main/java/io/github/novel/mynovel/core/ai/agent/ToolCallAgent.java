@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 @Data
 @Slf4j
 public class ToolCallAgent extends ReActAgent {  
+
+    private static final Pattern PDF_DOWNLOAD_LINK_PATTERN = Pattern.compile("\\[([^]]*下载[^]]*)]\\s*\\((https?://[^\\s)]+)\\)");
   
     // 可用的工具  
     private final ToolCallback[] availableTools;
@@ -188,6 +190,9 @@ public class ToolCallAgent extends ReActAgent {
         if (!hasText(normalized)) {
             return "没有返回内容。";
         }
+        if (containsDownloadLink(normalized)) {
+            return formatDownloadLink(responseData);
+        }
         if (normalized.startsWith("Error") || normalized.startsWith("错误")) {
             return truncate(normalized, 260);
         }
@@ -203,6 +208,45 @@ public class ToolCallAgent extends ReActAgent {
         }
 
         return truncate(normalized, 420);
+    }
+
+    private boolean containsDownloadLink(String text) {
+        return text.contains("PDF 已生成：") && PDF_DOWNLOAD_LINK_PATTERN.matcher(text).find();
+    }
+
+    private String formatDownloadLink(String responseData) {
+        Matcher matcher = PDF_DOWNLOAD_LINK_PATTERN.matcher(responseData);
+        if (!matcher.find()) {
+            return responseData.trim();
+        }
+
+        String linkText = matcher.group(1);
+        String url = matcher.group(2);
+        String fileName = linkText.replaceFirst("^点击下载\\s*", "").trim();
+        if (!hasText(fileName)) {
+            fileName = "agent 生成文件.pdf";
+        }
+        return """
+                PDF 已生成：<a class="ai_download_link" href="%s">%s</a>
+
+                <span class="ai_download_hint">%s</span>
+                """.formatted(
+                escapeHtmlAttribute(url),
+                escapeHtml("下载 PDF"),
+                escapeHtml(fileName + "，链接 7 天内有效")
+        ).trim();
+    }
+
+    private String escapeHtml(String text) {
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
+    private String escapeHtmlAttribute(String text) {
+        return escapeHtml(text);
     }
 
     private List<String> extractJsonValues(String text, String key, int limit) {

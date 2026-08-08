@@ -14,13 +14,12 @@ import java.util.stream.Collectors;
 
 public class WebSearchTool {
 
-    // SearchAPI 的搜索接口地址
-    private static final String SEARCH_API_URL = "https://www.searchapi.io/api/v1/search";
-
     private final String apiKey;
+    private final String apiUrl;
 
-    public WebSearchTool(String apiKey) {
+    public WebSearchTool(String apiKey, String apiUrl) {
         this.apiKey = apiKey;
+        this.apiUrl = apiUrl;
     }
 
     @Tool(description = "Search for information from Baidu Search Engine")
@@ -31,7 +30,7 @@ public class WebSearchTool {
         paramMap.put("api_key", apiKey);
         paramMap.put("engine", "baidu");
         try {
-            String response = HttpUtil.get(SEARCH_API_URL, paramMap);
+            String response = HttpUtil.get(apiUrl, paramMap);
             // 取出返回结果的前 5 条
             JSONObject jsonObject = JSONUtil.parseObj(response);
             // 提取 organic_results 部分

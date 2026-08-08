@@ -7,11 +7,19 @@ import org.springframework.ai.tool.annotation.ToolParam;
 
 public class FileOperationTool {
 
-    private final String FILE_DIR = FileConstant.FILE_SAVE_DIR + "/file";
+    private final String fileDir;
+
+    public FileOperationTool() {
+        this(FileConstant.DEFAULT_FILE_SAVE_DIR);
+    }
+
+    public FileOperationTool(String fileSaveDir) {
+        this.fileDir = fileSaveDir + "/file";
+    }
 
     @Tool(description = "Read content from a file")
     public String readFile(@ToolParam(description = "Name of the file to read") String fileName) {
-        String filePath = FILE_DIR + "/" + fileName;
+        String filePath = fileDir + "/" + fileName;
         try {
             return FileUtil.readUtf8String(filePath);
         } catch (Exception e) {
@@ -23,10 +31,10 @@ public class FileOperationTool {
     public String writeFile(
         @ToolParam(description = "Name of the file to write") String fileName,
         @ToolParam(description = "Content to write to the file") String content) {
-        String filePath = FILE_DIR + "/" + fileName;
+        String filePath = fileDir + "/" + fileName;
         try {
             // 创建目录
-            FileUtil.mkdir(FILE_DIR);
+            FileUtil.mkdir(fileDir);
             FileUtil.writeUtf8String(content, filePath);
             return "File written successfully to: " + filePath;
         } catch (Exception e) {

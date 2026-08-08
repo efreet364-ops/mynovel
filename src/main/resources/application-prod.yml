@@ -1,0 +1,67 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:1}
+
+  amqp:
+    enabled: ${AMQP_ENABLED:false}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/novel}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+  elasticsearch:
+    enabled: ${ES_ENABLED:false}
+    uris: ${ES_URIS:http://127.0.0.1:9200}
+
+  ai:
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY:}
+
+search-api:
+  api-key: ${SEARCH_API_KEY:}
+  url: ${SEARCH_API_URL:https://www.searchapi.io/api/v1/search}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  currency: ${STRIPE_CURRENCY:aud}
+  cny-to-aud-rate: ${STRIPE_CNY_TO_AUD_RATE:0.21}
+  min-amount-cny: ${STRIPE_MIN_AMOUNT_CNY:1}
+  max-amount-cny: ${STRIPE_MAX_AMOUNT_CNY:500}
+  success-url: ${STRIPE_SUCCESS_URL}
+  cancel-url: ${STRIPE_CANCEL_URL}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expire: ${JWT_ACCESS_TOKEN_EXPIRE:1800}
+  refresh-token-expire: ${JWT_REFRESH_TOKEN_EXPIRE:604800}
+
+aliyun:
+  oss:
+    endpoint: ${ALIYUN_OSS_ENDPOINT:https://oss-cn-beijing.aliyuncs.com}
+    region: ${ALIYUN_OSS_REGION:cn-beijing}
+    bucket-name: ${ALIYUN_OSS_BUCKET_NAME}
+    agent-bucket-name: ${ALIYUN_OSS_AGENT_BUCKET_NAME}
+    agent-url-expire-days: ${ALIYUN_OSS_AGENT_URL_EXPIRE_DAYS:7}
+    agent-prefix: ${ALIYUN_OSS_AGENT_PREFIX:agent/pdf/}
+
+app:
+  file-save-dir: ${APP_FILE_SAVE_DIR:/opt/mynovel/tmp}
+  cors:
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
+
+logging:
+  level:
+    org.springframework.ai: ${SPRING_AI_LOG_LEVEL:INFO}

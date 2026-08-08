@@ -10,9 +10,19 @@ import java.io.File;
 
 public class ResourceDownloadTool {
 
+    private final String fileSaveDir;
+
+    public ResourceDownloadTool() {
+        this(FileConstant.DEFAULT_FILE_SAVE_DIR);
+    }
+
+    public ResourceDownloadTool(String fileSaveDir) {
+        this.fileSaveDir = fileSaveDir;
+    }
+
     @Tool(description = "Download a resource from a given URL")
     public String downloadResource(@ToolParam(description = "URL of the resource to download") String url, @ToolParam(description = "Name of the file to save the downloaded resource") String fileName) {
-        String fileDir = FileConstant.FILE_SAVE_DIR + "/download";
+        String fileDir = fileSaveDir + "/download";
         String filePath = fileDir + "/" + fileName;
         try {
             // 创建目录

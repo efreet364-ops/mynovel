@@ -1,9 +1,15 @@
 package io.github.novel.mynovel.core.ai.constant;
 
-public interface FileConstant {
+import java.nio.file.Paths;
+
+public final class FileConstant {
+
+    private FileConstant() {
+    }
 
     /**
-     * 文件保存目录
+     * AI 工具本地临时文件默认保存目录。
      */
-    String FILE_SAVE_DIR = "/Users/efreet233/后端学习/novel/MyNovel/tmp";
+    public static final String DEFAULT_FILE_SAVE_DIR = Paths.get(
+            System.getProperty("java.io.tmpdir"), "mynovel").toString();
 }
