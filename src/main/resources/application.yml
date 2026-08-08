@@ -36,7 +36,7 @@ spring:
   # Spring AMQP 配置
   amqp:
     # 是否开启 Spring AMQP：true-开启 false-不开启
-    enabled: ${AMQP_ENABLED:false}
+    enabled: ${AMQP_ENABLED:true}
 
   rabbitmq:
     host: ${RABBITMQ_HOST:127.0.0.1}
