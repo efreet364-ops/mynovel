@@ -36,7 +36,7 @@ spring:
   # Spring AMQP 配置
   amqp:
     # 是否开启 Spring AMQP：true-开启 false-不开启
-    enabled: ${AMQP_ENABLED:true}
+    enabled: ${AMQP_ENABLED:false}
 
   rabbitmq:
     host: ${RABBITMQ_HOST:127.0.0.1}
@@ -48,7 +48,7 @@ spring:
   # elasticsearch
   elasticsearch:
     # 是否开启 Elasticsearch 搜索引擎功能：true-开启 false-不开启
-    enabled: ${ES_ENABLED:true}
+    enabled: ${ES_ENABLED:false}
     uris: ${ES_URIS:http://localhost:9200}
 
 # searchApi
@@ -85,6 +85,13 @@ app:
   file-save-dir: ${APP_FILE_SAVE_DIR:${java.io.tmpdir}/mynovel}
   cors:
     allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,http://192.168.50.*:*}
+
+management:
+  health:
+    rabbit:
+      enabled: ${MANAGEMENT_HEALTH_RABBIT_ENABLED:false}
+    elasticsearch:
+      enabled: ${MANAGEMENT_HEALTH_ELASTICSEARCH_ENABLED:false}
 
 logging:
   level:
